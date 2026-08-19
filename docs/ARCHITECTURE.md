@@ -20,6 +20,17 @@ The selected media stays on the device. A Blob Worker initializes the compact FF
 
 `dependencies.json` pins FFmpeg WASM Builder v1.2.0 and the Media Inspector release asset. The build downloads the release checksum list, verifies the binary ZIP with SHA-256, and records the corresponding-source URL and hash in `dist/dependency-manifest.json`.
 
+## Metadata cleaning
+
+The pinned FFmpeg WASM `media-inspector` runner remains inspection-only and is not used to rewrite media. Supported metadata cleaning is implemented in browser JavaScript using `File.slice()` / `Blob` composition:
+
+- ISO BMFF (MP4 / MOV / M4V / M4A): fixed-size metadata edits leave media payload offsets and `mdat` bytes unchanged.
+- MP3: tag regions are excluded while audio-frame bytes are preserved.
+- FLAC: the metadata-block chain is rebuilt without Vorbis Comment/Picture blocks, then the original audio frames are appended unchanged.
+- WAV: the RIFF container is rebuilt without known metadata chunks while the original audio `data` chunk is copied unchanged.
+
+The original file is never modified. The cleaned output filename is editable and defaults to the source basename plus `_metadata-cleaned`; its media extension is kept fixed. The result is re-inspected with the embedded FFmpeg core before download. The cleaner deliberately preserves chapter content, codec bitstreams, and dedicated data/telemetry stream payloads; the UI warns that such payloads can still contain titles, GPS, or device-specific information.
+
 ## Media Doctor
 
 The FFmpeg runner reports media facts. Browser compatibility guidance is intentionally computed in the app rather than hard-coded into WASM. Media Doctor combines codec/container facts with `HTMLMediaElement.canPlayType()` and a local native media probe. Its result is advisory rather than a guarantee because browser, operating-system, and hardware codec support can differ.

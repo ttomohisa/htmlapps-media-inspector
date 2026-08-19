@@ -8,7 +8,9 @@
 
 A privacy-focused, single-HTML app for inspecting video and audio files entirely in the browser. It reports the container, codecs, bitrate, frame rate, pixel format, HDR/color information, audio layout, metadata, chapters, subtitles, rotation, and more without uploading the selected file to a server.
 
-Media Inspector also includes **Media Doctor**, which combines the FFmpeg inspection result with signals from the browser you are currently using. It helps answer questions such as **“What is inside this file?”** and **“Why might this video fail to play in my browser?”** without turning the app into a transcoder or repair tool.
+For MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV, Media Inspector can also create a **new cleaned copy with personal metadata removed**. Video/audio payloads are not re-encoded, the original file is left unchanged, and the cleaned copy is automatically re-inspected before download.
+
+Media Inspector also includes **Media Doctor**, which combines the FFmpeg inspection result with signals from the browser you are currently using. It helps answer questions such as **“What is inside this file?”** and **“Why might this video fail to play in my browser?”** without turning the inspection core into a transcoder or repair tool.
 
 ## 🚀 Live demo
 
@@ -30,6 +32,10 @@ GitHub Pages delivers the initial HTML. After it loads, the selected media file 
 - **Media Doctor** with browser-specific playback hints
 - Combine FFmpeg data with `canPlayType()` and a local native `<video>` / `<audio>` load probe
 - Warn about common compatibility factors such as HEVC, AV1, unusual containers, HDR, rotation metadata, or weak browser support signals
+- **Remove personal metadata & save** for MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV
+- Remove common capture dates, location, device/software metadata tags, title, author, comment, cover-art and similar metadata without re-encoding audio/video
+- Re-inspect the cleaned copy before download and warn when privacy-like metadata remains or verification fails
+- Edit the output filename before saving; the default appends `_metadata-cleaned` to the source basename (for example, `sample_metadata-cleaned.mp4`)
 - Copy the complete inspection report as JSON
 - Save the complete inspection report as a `.json` file
 - Confirm before replacing an existing report with another file
@@ -71,8 +77,9 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 4. Review **Basic information** for the container, duration, bitrate, and stream counts.
 5. Review the **Video** and **Audio** cards for codec-specific details.
 6. Open **Subtitles & other** when the file contains additional streams.
-7. Open **Details** to review metadata, chapters, the complete raw JSON report, and engine information.
-8. Use **Copy JSON** or **Save JSON** when you need the structured result outside the app.
+7. Use **Remove metadata & save** when you want a new cleaned copy. The original stays unchanged; the cleaned file is re-inspected before download.
+8. Open **Details** to review metadata, chapters, the complete raw JSON report, and engine information.
+9. Use **Copy JSON** or **Save JSON** when you need the structured result outside the app.
 
 ### What Media Inspector reports
 
@@ -85,6 +92,22 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 | **Details** | File metadata, chapters, raw inspection JSON, FFmpeg / runner / dependency information |
 
 Not every file contains every field. Missing information is shown as unavailable rather than guessed, except for the explicitly marked two-channel layout fallback described under Limitations.
+
+
+## Remove metadata & save
+
+The cleaner is deliberately separate from the inspection-only FFmpeg WASM runner. It edits or omits metadata container regions in browser JavaScript and assembles a new `Blob`; it does not decode or re-encode video/audio frames.
+
+| Format | What is removed | Media payload |
+| --- | --- | --- |
+| **MP4 / MOV / M4V / M4A** | movie/track/media creation times, container `meta` / user-data tags, recognized XMP-style metadata | `mdat` and playback-critical track/codec structures are preserved |
+| **MP3** | leading ID3v2 and trailing ID3v1 / APEv2 tags | audio-frame region is copied unchanged |
+| **FLAC** | Vorbis Comment and Picture metadata blocks | FLAC audio frames are copied unchanged |
+| **WAV** | common RIFF metadata chunks such as LIST/INFO, BEXT, iXML, AXML, XMP, ID3, CART, DISP and EXIF | audio `data` chunk is copied unchanged |
+
+After cleaning, the generated file is passed through the same embedded FFmpeg inspector again. If privacy-like metadata is still visible, Media Inspector shows a warning before allowing an unverified save. The output filename is editable. By default, `_metadata-cleaned` is appended to the source basename; if that basename contains a date, person, device name, or other private detail, it can be changed before saving.
+
+**Important boundary:** chapter content, codec bitstreams, and dedicated Data / telemetry stream payloads are preserved because removing or rewriting those safely requires a different remux/stream-rewrite path. Chapter titles, codec-embedded encoder/device strings, GPS, or other device information stored inside those payloads can therefore remain. RF64 cleaning is also not enabled. The UI states this limitation and the original file is never modified.
 
 ## Media Doctor
 
@@ -119,6 +142,7 @@ Media Inspector does not bundle the full FFmpeg command-line application. It use
 5. The runner writes only a small structured JSON report to MEMFS.
 6. The browser UI renders that report into readable cards.
 7. Media Doctor adds current-browser compatibility signals without changing the original report.
+8. Metadata cleaning, when requested, is performed browser-side with `File.slice()` / `Blob` composition and the cleaned copy is re-inspected by the same WASM runner before download.
 
 Because the input stays mounted as a browser `File`, the app avoids calling `File.arrayBuffer()` on the entire selected media file just to place it in WASM memory.
 
@@ -198,6 +222,7 @@ The generated HTML is designed so inspection does not depend on a runtime server
 - The selected media file is mounted locally with WORKERFS
 - Media Doctor uses local browser APIs and local Blob URLs
 - The generated JSON report stays in the browser unless you explicitly copy or save it
+- Metadata-cleaned output is assembled locally from the selected file and downloaded only when you request it
 - No analytics, telemetry, login, cloud storage, or remote fonts are used by the app
 
 The GitHub Pages version requires an initial HTML request, but the media file you select and the inspection result are not transmitted by the app.
@@ -213,7 +238,10 @@ For use with the network completely disconnected, open the generated `dist/index
 - If a file reports only a two-channel count without an explicit channel layout, the UI can show FFmpeg's canonical default `stereo`; the JSON marks that fallback with `channelLayoutInferred: true` and keeps the originally reported layout separately.
 - Media Doctor is specific to the browser/device running the app and is not a cross-platform playback guarantee.
 - Native playback support may change with browser, OS, or hardware updates even when the file itself does not change.
-- The app does not repair, convert, transcode, normalize, or edit media files.
+- Metadata cleaning is limited to MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV; other formats remain inspection-only.
+- Chapter content, codec bitstreams, and dedicated Data / telemetry stream payloads are preserved and may still contain titles, GPS, or device-specific information.
+- RF64 metadata cleaning is not supported.
+- The app does not repair media, transcode codecs, normalize audio, or overwrite the original file.
 - The standard HTML uses `DecompressionStream('gzip')`; a current Chrome, Edge, Firefox, or Safari release is recommended.
 
 ## Dependencies

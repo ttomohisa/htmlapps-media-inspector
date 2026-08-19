@@ -8,7 +8,9 @@
 
 動画・音声ファイルをブラウザー内だけで解析し、コンテナ、コーデック、bitrate、fps、pixel format、HDR / 色情報、音声チャンネル、metadata、chapters、字幕、rotationなどを確認できる単一HTMLアプリです。選択したファイルを解析のためにサーバーへアップロードしません。
 
-さらに **Media Doctor** を搭載し、FFmpegの解析結果と「今このアプリを開いているブラウザー」の情報を組み合わせて、**「このファイルの中身は何か」**だけでなく、**「なぜこの動画はブラウザーで再生できない可能性があるのか」**も分かりやすく整理します。変換・修復ツールではなく、メディアの状態を調べるための検査ツールです。
+MP4 / MOV / M4V / M4A / MP3 / FLAC / WAVでは、**個人情報メタデータを削除した新しいコピーを保存**することもできます。映像・音声は再エンコードせず、元ファイルは変更しません。保存前には削除後ファイルを同じInspectorで自動再検査します。
+
+さらに **Media Doctor** を搭載し、FFmpegの解析結果と「今このアプリを開いているブラウザー」の情報を組み合わせて、**「このファイルの中身は何か」**だけでなく、**「なぜこの動画はブラウザーで再生できない可能性があるのか」**も分かりやすく整理します。
 
 ## 🚀 デモ
 
@@ -30,6 +32,10 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 - **Media Doctor** で現在のブラウザー向けの再生互換性ヒントを表示
 - FFmpeg解析結果に `canPlayType()` とローカルの `<video>` / `<audio>` 読み込み結果を組み合わせて判定
 - HEVC、AV1、特殊なコンテナ、HDR、rotation、弱いブラウザー対応シグナルなどを注意点として整理
+- **メタデータを削除して保存**：MP4 / MOV / M4V / M4A / MP3 / FLAC / WAVに対応
+- 撮影日時、位置情報、一般的な端末/ソフト情報タグ、タイトル、作者、コメント、カバー画像などのメタデータを映像・音声の再エンコードなしで削除
+- 削除後ファイルを保存前に自動再検査し、個人情報候補が残る場合や再検査に失敗した場合は警告
+- 保存ファイル名は編集可能。デフォルトは元ファイル名に `_metadata-cleaned` を付けた名前（例: `sample_metadata-cleaned.mp4`）
 - 完全な解析結果をJSONとしてコピー
 - 完全な解析結果を `.json` ファイルとして保存
 - 解析結果がある状態で別ファイルへ切り替えるときは確認ダイアログを表示
@@ -71,8 +77,9 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 4. **基本情報** でコンテナ、時間、bitrate、stream数などを確認します。
 5. **Video** / **Audio** カードでコーデックや映像・音声の詳細を確認します。
 6. 字幕や追加streamがある場合は **字幕・その他** を確認します。
-7. **詳細** ではmetadata、chapters、解析JSON、FFmpeg / runner / dependency情報を確認できます。
-8. 必要なら **JSONをコピー** または **JSONを保存** します。
+7. 個人情報を取り除いたコピーが必要なら **メタデータを削除して保存** を使います。元ファイルは変更されず、保存前に削除後ファイルを自動再検査します。
+8. **詳細** ではmetadata、chapters、解析JSON、FFmpeg / runner / dependency情報を確認できます。
+9. 必要なら **JSONをコピー** または **JSONを保存** します。
 
 ### 解析できる主な情報
 
@@ -85,6 +92,22 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 | **詳細** | ファイルmetadata、chapters、解析JSON、FFmpeg / runner / dependency情報 |
 
 すべてのファイルにすべての情報が入っているわけではありません。元ファイルに記録されていない情報は、原則として無理に推定せず「不明」として扱います。例外として2ch音声のchannel layout補完については「制限事項」で説明しています。
+
+
+## メタデータを削除して保存
+
+削除保存は、解析専用のFFmpeg WASM runnerとは分離してブラウザーJavaScriptで行います。メタデータ領域を削除・無効化しながら `File.slice()` と `Blob` で新しいファイルを組み立てるため、映像・音声フレームをdecode / encodeし直しません。
+
+| 形式 | 主な削除対象 | メディア本体 |
+| --- | --- | --- |
+| **MP4 / MOV / M4V / M4A** | movie / track / mediaの作成・更新日時、container `meta` / user-dataタグ、認識できるXMP系metadata | `mdat` と再生に必要なtrack / codec構造を保持 |
+| **MP3** | 先頭ID3v2、末尾ID3v1 / APEv2 | 音声frame領域をそのままコピー |
+| **FLAC** | Vorbis Comment、Picture metadata block | FLAC音声frameをそのままコピー |
+| **WAV** | LIST/INFO、BEXT、iXML、AXML、XMP、ID3、CART、DISP、EXIFなどのRIFF metadata chunk | `data` chunkをそのままコピー |
+
+削除後に生成したファイルは、保存前に同じFFmpeg Inspectorへもう一度渡します。個人情報らしいmetadataが見つかった場合は「完全に消えた」と扱わず警告し、ユーザーが明示的に選んだ場合だけ未検証扱いで保存できます。保存ファイル名は編集でき、デフォルトでは元ファイル名に `_metadata-cleaned` を付けます。元ファイル名自体に日時・氏名などが含まれる場合は、保存前に入力欄から変更できます。
+
+**重要な範囲外:** chapterの内容、codec bitstream、専用のData / telemetry stream payloadは保持します。これらを安全に削除するには別のremux / stream書き換え処理が必要なため、chapter名、codec内部のencoder / 端末文字列、専用stream内のGPS・端末情報などが残る可能性があります。RF64の削除保存にも未対応です。UI上でもこの制限を表示し、元ファイル自体は一切変更しません。
 
 ## Media Doctor
 
@@ -119,6 +142,7 @@ Media Inspectorはフル版のFFmpegコマンドラインをそのままWASM化�
 5. MEMFSへ書き出すのは小さな構造化JSONレポートだけ
 6. ブラウザー側がJSONを読みやすいカードUIへ変換
 7. Media Doctorが現在のブラウザー固有の互換性情報を追加表示
+8. 削除保存を選んだ場合は、ブラウザー側で `File.slice()` / `Blob` を使って新しいコピーを構成し、保存前に同じWASM runnerで再検査
 
 入力ファイルはWORKERFSでマウントするため、WASMへ渡す目的だけで選択ファイル全体に `File.arrayBuffer()` を実行してMEMFSへコピーする構成にはしていません。
 
@@ -198,6 +222,7 @@ Pagesがまだ有効化されていない場合、workflowはstandalone HTMLの�
 - 選択したメディアはWORKERFSでローカルにマウント
 - Media Doctorはブラウザー内APIとローカルBlob URLだけを使用
 - 解析JSONは、ユーザーが明示的にコピー・保存しない限りブラウザー内に留まる
+- メタデータ削除後のファイルも端末内だけで組み立て、ユーザーが保存を選んだときだけダウンロードする
 - analytics、telemetry、login、cloud storage、remote fontは使用しない
 
 GitHub Pages版では最初のHTMLを取得する通信は発生しますが、選択した動画・音声や解析結果をアプリが外部へ送信することはありません。
@@ -213,7 +238,10 @@ GitHub Pages版では最初のHTMLを取得する通信は発生しますが、�
 - ファイルが明示的なchannel layoutを持たず「2 channels」だけを報告する場合、表示用にFFmpegの標準的な `stereo` layoutを補完することがあります。JSONでは `channelLayoutInferred: true` として推定値であることを記録し、元の報告値も別に保持します。
 - Media Doctorは現在アプリを開いているブラウザー / 端末向けの診断であり、他環境を含む絶対的な再生保証ではありません。
 - ブラウザー、OS、ハードウェア側の更新によって、同じファイルでも将来の再生可否が変わる可能性があります。
-- ファイル修復、container変換、transcode、音量調整、metadata編集は行いません。
+- メタデータ削除保存は MP4 / MOV / M4V / M4A / MP3 / FLAC / WAVに限定し、それ以外は解析のみです。
+- chapterの内容、codec bitstream、専用Data / telemetry stream payloadは保持するため、chapter名やGPS・端末固有情報が残る場合があります。
+- RF64のメタデータ削除保存には対応していません。
+- ファイル修復、codecのtranscode、音量調整、元ファイルの上書きは行いません。
 - 通常版HTMLでは `DecompressionStream('gzip')` を使用するため、現在のChrome / Edge / Firefox / Safariを推奨します。
 
 ## 使用コンポーネント

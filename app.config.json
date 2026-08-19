@@ -4,8 +4,8 @@
   "nameJa": "Media Inspector",
   "slug": "media-inspector",
   "version": "1.0.0",
-  "description": "Inspect video and audio codec, bitrate, frame rate, HDR, metadata, subtitles, chapters, and browser playback hints locally in one HTML file.",
-  "descriptionJa": "動画・音声のコーデック、ビットレート、フレームレート、HDR、メタデータ、字幕、チャプター、ブラウザ再生のヒントを端末内だけで確認できる単一HTMLアプリです。",
+  "description": "Inspect video/audio details locally and save supported formats as new copies with personal metadata removed, all in one HTML file.",
+  "descriptionJa": "動画・音声の詳細を端末内だけで解析し、対応形式は個人情報メタデータを削除した新しいコピーとして保存できる単一HTMLアプリです。",
   "defaultLanguage": "auto",
   "repository": {
     "owner": "ttomohisa",
