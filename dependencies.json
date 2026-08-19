@@ -1,0 +1,28 @@
+{
+  "$schema": "./schemas/dependencies.schema.json",
+  "dependencies": [
+    {
+      "id": "ffmpeg-wasm-builder",
+      "source": "github-release",
+      "repository": "ttomohisa/htmlapps-ffmpeg-wasm-builder",
+      "version": "1.2.0",
+      "releaseAsset": "ffmpeg-wasm-media-inspector-v{version}.zip",
+      "checksumsAsset": "SHA256SUMS.txt",
+      "sourceAsset": "ffmpeg-wasm-sources-v{version}.tar.gz",
+      "license": "Generated FFmpeg core: LGPL-2.1-or-later; see THIRD_PARTY_NOTICES.md",
+      "homepage": "https://github.com/ttomohisa/htmlapps-ffmpeg-wasm-builder",
+      "assets": [
+        {
+          "key": "core-js-gzip",
+          "path": "ffmpeg.js.gz",
+          "mime": "application/gzip"
+        },
+        {
+          "key": "core-wasm-gzip",
+          "path": "ffmpeg.wasm.gz",
+          "mime": "application/gzip"
+        }
+      ]
+    }
+  ]
+}
