@@ -18,6 +18,8 @@ MP4 / MOV / M4V / M4A / MP3 / FLAC / WAVでは、**個人情報メタデータ�
 
 GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディアの解析はHTML内に埋め込まれたFFmpeg 9 WebAssemblyで端末内処理されます。ファイル内容、metadata、生成された解析結果をアプリが外部へ送信することはありません。
 
+![WebMコンテナ、VP9ストリーム、ビットレート、再生診断を表示したMedia Inspector](assets/screenshot.png)
+
 ## 主な機能
 
 - 動画・音声ファイルをブラウザー内だけで解析

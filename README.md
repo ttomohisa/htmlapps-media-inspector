@@ -18,6 +18,8 @@ Media Inspector also includes **Media Doctor**, which combines the FFmpeg inspec
 
 GitHub Pages delivers the initial HTML. After it loads, the selected media file is inspected locally with the embedded FFmpeg 9 WebAssembly core. The file contents, metadata, and generated inspection report are not uploaded by the app.
 
+![Media Inspector showing WebM container, VP9 stream, bitrate, and playback diagnostics](assets/screenshot.png)
+
 ## Features
 
 - Inspect video and audio files entirely in the browser
