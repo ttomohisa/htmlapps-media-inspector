@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Allow embedded WebAssembly in the self-extract wrapper CSP while keeping JavaScript eval and network access blocked; added a real-runtime WAV regression.
+
+- Fixed inspection cancellation during embedded runtime expansion and stale Worker/native probe results after source replacement.
+- Settle cancelled Worker operations and release each operation’s own Worker and Blob URL.
+- Added browser regressions for cold cancellation, source replacement, obsolete callbacks, and native probe completion.
+
 ## 1.0.0 - 2026-08-19
 
 - Added the first Media Inspector release.
