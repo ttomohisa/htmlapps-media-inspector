@@ -41,6 +41,7 @@ GitHub Pages delivers the initial HTML. After it loads, the selected media file 
 - Copy the complete inspection report as JSON
 - Save the complete inspection report as a `.json` file
 - Confirm before replacing an existing report with another file
+- Cancel inspection during preparation or processing, then inspect again or choose another file
 - Japanese and English UI in the same HTML
 - Responsive desktop and mobile layout
 - Smartphone bottom navigation for File / Doctor / Video / Audio / Details
@@ -263,3 +264,7 @@ Bug reports and feature proposals are welcome through GitHub Issues. See [CONTRI
 Copyright © 2026 ttomohisa
 
 Application source is licensed under the [MIT License](LICENSE). The embedded generated FFmpeg core is distributed under its separate LGPL terms described in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+### Lifecycle regression tests
+
+With Node.js and Playwright available, run `node --test scripts/test-inspection-lifecycle.cjs` after building. Set `PLAYWRIGHT_MODULE` to a Playwright module path if it is not installed in the normal Node resolution path, and `PLAYWRIGHT_CHANNEL` to choose the installed browser (default: `msedge`). The tests use synthetic media and controlled runtime scheduling, plus actual embedded WASM inspection in the self-extract artifact; no media is uploaded.

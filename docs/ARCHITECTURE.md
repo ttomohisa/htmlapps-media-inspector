@@ -2,9 +2,13 @@
 
 ## Runtime model
 
-Media Inspector is distributed as one HTML file. The page contains the application code plus gzip-compressed `ffmpeg.js` and `ffmpeg.wasm` from the pinned FFmpeg WASM Builder release. Runtime networking is blocked by CSP (`connect-src 'none'`).
+Media Inspector is distributed as one HTML file. The page contains the application code plus gzip-compressed `ffmpeg.js` and `ffmpeg.wasm` from the pinned FFmpeg WASM Builder release. Runtime networking is blocked by CSP (`connect-src 'none'`). Both readable and self-extract packaging allow embedded WebAssembly via `wasm-unsafe-eval`; JavaScript `unsafe-eval` is not enabled. The wrapper policy also applies to the decoded app and its Blob Workers.
 
 The selected media stays on the device. A Blob Worker initializes the compact FFmpeg core and mounts the browser `File` through Emscripten WORKERFS. The runner accepts only `--input` and `--output`, reads container/stream metadata, and writes a small JSON report to MEMFS. No decoder, encoder, filter, swscale, or swresample stage is used by the Media Inspector profile.
+
+## Inspection ownership
+
+Source inspection uses a monotonically increasing generation. Runtime loading has its own generation so Cancel or replacement during gzip expansion prevents Worker creation afterward. Each Worker callback closes over its own Worker and Blob URL; completion, error, or cancellation settles once and releases only that operation. Source generations are checked after inspection and native playback checks before publishing results. Metadata-cleaned copy verification uses the same Worker ownership helper.
 
 ## Build placeholders
 

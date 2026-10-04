@@ -16,6 +16,10 @@ Inspect common video/audio files locally and present technical media facts in a 
 8. Before download, the cleaned copy is re-inspected with the same FFmpeg WASM inspector. If privacy-like metadata is still detected, the app warns instead of claiming complete removal.
 9. User can copy or save the structured JSON report independently of metadata cleaning.
 
+## Inspection cancellation and replacement
+
+Cancel also applies while the embedded runtime is expanding. Cancel, source replacement, and page exit invalidate pending runtime preparation, Worker callbacks, and browser probe results. A cancelled Worker Promise settles, and obsolete work cannot terminate the current Worker or publish a report for the new source. The selected source can be inspected again after Cancel.
+
 ## Required information
 
 ### Format
