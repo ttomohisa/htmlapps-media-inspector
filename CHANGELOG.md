@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add Japanese/English UTF-8 technical-summary downloads for the current successful report, with sanitized filenames and metadata/chapter-title exclusion.
+- Use detected format families for container labels instead of trusting filename extensions; preserve ambiguous and unavailable formats explicitly.
+- Cover text-export contents, lifecycle, download failures, filenames and container regressions across source and all release artifacts.
+
 - Keep JSON copy tied to the requested report and latest copy operation; obsolete fallback and feedback cannot affect a replacement report.
 - Report clipboard fallback failure accurately, remove temporary controls and restore focus, with Japanese/English Save JSON guidance.
 - Round displayed durations with correct second/minute/hour carries and show unknown durations as `—` without changing raw JSON.

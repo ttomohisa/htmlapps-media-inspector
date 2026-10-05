@@ -14,7 +14,7 @@ Inspect common video/audio files locally and present technical media facts in a 
 6. The result is shown as Media Doctor, metadata cleaner, overview, Video, Audio, subtitle/other and Details sections.
 7. For MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV, the user can create a cleaned copy without re-encoding the audio/video payload. On smartphones, the clean/save action is exposed directly in the fixed bottom action bar; the filename editor remains in the cleaner section.
 8. Before download, the cleaned copy is re-inspected with the same FFmpeg WASM inspector. If privacy-like metadata is still detected, the app warns instead of claiming complete removal.
-9. User can copy or save the structured JSON report independently of metadata cleaning.
+9. User can copy or save the structured JSON report, or save a localized technical text summary from Basic information, independently of metadata cleaning.
 
 ## Inspection cancellation and replacement
 
@@ -27,6 +27,17 @@ Cancel also applies while the embedded runtime is expanding. Cancel, source repl
 - A native clipboard write already in progress cannot be undone. Late completion must not overwrite feedback for another report or newer copy request.
 - Fallback copying counts as successful only when the browser reports success. Failure shows a Japanese/English message suggesting Save JSON; temporary controls are always removed and connected previous focus is restored. Users may retry.
 - Overview, stream and chapter times round the total duration to milliseconds before splitting hours/minutes/seconds. Missing, blank, non-finite, negative or unrepresentably large values display `—`; zero remains valid. Raw copied/saved JSON values are unchanged.
+
+## Technical summary and container labels
+
+- Basic information provides **Save technical summary** / **技術情報の要約を保存** only after the current successful inspection report has finished publishing. Reset, reanalysis, cancellation, failure and page exit cannot export an obsolete report; cancelling replacement keeps the existing result available.
+- Save a synchronous, local UTF-8 `text/plain;charset=utf-8` download with localized labels and one final newline. Use a sanitized source stem plus `-inspection-summary.txt`; remove path, control and direction-control characters, trim trailing dots/spaces, bound the stem to 180 UTF-8 bytes without splitting characters, and fall back to `media`.
+- Include container, detected format, size, duration, total bitrate, stream count, and every stream's index, type and codec. Video adds resolution, frame rate and HDR classification. Audio adds sample rate, channel count/layout and an inferred-layout qualifier when reported by the inspector.
+- Qualify a known positive bitrate only for the runner's `container` or `estimated-from-size-duration` provenance. Do not infer a source for an unknown bitrate.
+- Preserve valid zero durations/counts/sizes. Missing, blank, non-finite, negative or invalid technical values remain `—`; do not coerce them to zero.
+- Exclude arbitrary metadata values, chapter titles, source filenames within the text, and Media Doctor playback claims. The download filename still derives from the original name; remind users to check it before sharing.
+- Derive shared container labels from the detected format, never from filename extensions. Keep `MP4 / MOV` and `Matroska / WebM` families explicit, retain unfamiliar reported names, and show `—` when no format is reported.
+- Keep raw JSON, inspection/cleaning lifecycle, parser, WASM, WORKERFS and cleaner routing unchanged. Download errors show localized feedback and permit retry.
 
 ## Required information
 
