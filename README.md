@@ -84,6 +84,10 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 8. Open **Details** to review metadata, chapters, the complete raw JSON report, and engine information.
 9. Use **Copy JSON** or **Save JSON** when you need the structured result outside the app.
 
+Durations are rounded to milliseconds, including carries across minute/hour boundaries. Unavailable durations show `—`; exported JSON keeps the original values.
+
+Copy JSON uses the report selected when you click it. If the report changes while copying is pending, the app skips that request's fallback and feedback; an already-started native clipboard write cannot be undone. Copy failure suggests **Save JSON**, and you can retry.
+
 ### What Media Inspector reports
 
 | Section | Typical information |
@@ -268,3 +272,7 @@ Application source is licensed under the [MIT License](LICENSE). The embedded ge
 ### Lifecycle regression tests
 
 With Node.js and Playwright available, run `node --test scripts/test-inspection-lifecycle.cjs` after building. Set `PLAYWRIGHT_MODULE` to a Playwright module path if it is not installed in the normal Node resolution path, and `PLAYWRIGHT_CHANNEL` to choose the installed browser (default: `msedge`). The tests use synthetic media and controlled runtime scheduling, plus actual embedded WASM inspection in the self-extract artifact; no media is uploaded.
+
+### Report regression checks
+
+The repository check requires Node.js 20+ as well as PowerShell. It runs `scripts/test-report-exports.cjs` against the source, readable release, root release and decoded self-extract payload. Run `node scripts/test-report-exports.cjs` for the source-only checks. These tests double browser/clipboard/media boundaries; native clipboard, browser focus and real-media behavior still need browser QA.

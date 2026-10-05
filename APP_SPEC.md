@@ -20,6 +20,14 @@ Inspect common video/audio files locally and present technical media facts in a 
 
 Cancel also applies while the embedded runtime is expanding. Cancel, source replacement, and page exit invalidate pending runtime preparation, Worker callbacks, and browser probe results. A cancelled Worker Promise settles, and obsolete work cannot terminate the current Worker or publish a report for the new source. The selected source can be inspected again after Cancel.
 
+## JSON export and duration display
+
+- Copy JSON snapshots the complete report text at the time of the click. A delayed clipboard rejection must never substitute a newer report or empty text.
+- Only the latest copy request for the still-current inspection report may use fallback copying or show feedback. Replacement, reanalysis, reset and page exit invalidate old follow-up work; cancelling the replacement confirmation retains the current report and copy.
+- A native clipboard write already in progress cannot be undone. Late completion must not overwrite feedback for another report or newer copy request.
+- Fallback copying counts as successful only when the browser reports success. Failure shows a Japanese/English message suggesting Save JSON; temporary controls are always removed and connected previous focus is restored. Users may retry.
+- Overview, stream and chapter times round the total duration to milliseconds before splitting hours/minutes/seconds. Missing, blank, non-finite, negative or unrepresentably large values display `—`; zero remains valid. Raw copied/saved JSON values are unchanged.
+
 ## Required information
 
 ### Format
