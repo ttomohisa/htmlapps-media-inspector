@@ -10,6 +10,10 @@ The selected media stays on the device. A Blob Worker initializes the compact FF
 
 Source inspection uses a monotonically increasing generation. Runtime loading has its own generation so Cancel or replacement during gzip expansion prevents Worker creation afterward. Each Worker callback closes over its own Worker and Blob URL; completion, error, or cancellation settles once and releases only that operation. Source generations are checked after inspection and native playback checks before publishing results. Metadata-cleaned copy verification uses the same Worker ownership helper.
 
+## Technical report exports
+
+JSON exports keep the complete report unchanged. The technical-summary formatter separately allowlists container/stream fields and produces localized UTF-8 text synchronously; it never serializes metadata or chapters. A summary-generation marker is published only after the existing inspection/browser-check flow completes. Reset clears the marker, and inspection-generation changes invalidate it, so an old report cannot be exported after replacement, cancellation or page exit. The download filename is sanitized and byte-bounded independently of the existing JSON filename behavior. The shared container-label helper uses detected names, preserving ambiguous format families instead of guessing from extensions.
+
 ## Build placeholders
 
 `src/index.template.html` contains exactly three build-time placeholders:

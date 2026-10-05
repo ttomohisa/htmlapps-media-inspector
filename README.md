@@ -84,6 +84,10 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 8. Open **Details** to review metadata, chapters, the complete raw JSON report, and engine information.
 9. Use **Copy JSON** or **Save JSON** when you need the structured result outside the app.
 
+Use **Save technical summary** in **Basic information** for a UTF-8 `.txt` report of container/format, size, duration, bitrate and each video, audio, subtitle, data or attachment stream. Labels follow the selected language. The summary excludes metadata values, chapter titles, source filenames in its text and playback judgments. Its download name is based on the source filename, so check it for personal details before sharing.
+
+Container labels follow the format detected by the inspector, even when a file has the wrong extension. Ambiguous families remain **MP4 / MOV** or **Matroska / WebM**; an unavailable format shows `—`.
+
 Durations are rounded to milliseconds, including carries across minute/hour boundaries. Unavailable durations show `—`; exported JSON keeps the original values.
 
 Copy JSON uses the report selected when you click it. If the report changes while copying is pending, the app skips that request's fallback and feedback; an already-started native clipboard write cannot be undone. Copy failure suggests **Save JSON**, and you can retry.
@@ -275,4 +279,4 @@ With Node.js and Playwright available, run `node --test scripts/test-inspection-
 
 ### Report regression checks
 
-The repository check requires Node.js 20+ as well as PowerShell. It runs `scripts/test-report-exports.cjs` against the source, readable release, root release and decoded self-extract payload. Run `node scripts/test-report-exports.cjs` for the source-only checks. These tests double browser/clipboard/media boundaries; native clipboard, browser focus and real-media behavior still need browser QA.
+The repository check requires Node.js 20+ as well as PowerShell. It runs `scripts/test-report-exports.cjs` against the source, readable release, root release and decoded self-extract payload. Run `node scripts/test-report-exports.cjs` for the source-only checks. The same suite also covers technical text exports, safe filenames, missing/zero values, metadata exclusion, report availability and detected container labels. These tests double browser/clipboard/download/media boundaries; native clipboard, browser focus and real-media behavior still need browser QA.
