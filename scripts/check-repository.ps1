@@ -85,6 +85,11 @@ if ($templateText -notmatch 'core\.FS\.mount\(core\.WORKERFS') { throw "Selected
 if ($templateText -notmatch "args:\['--input',inputName,'--output',outputName\]") { throw "Media Inspector runner must use its restricted --input/--output interface" }
 if ($templateText -match 'Single HTML App Starter') { throw "Starter product copy must not remain in the finished Media Inspector template" }
 
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js 20+ is required for report regression checks." }
+$reportTestPath = Join-Path $Root "scripts\test-report-exports.cjs"
+& node $reportTestPath $templatePath
+if ($LASTEXITCODE -ne 0) { throw "Report regression checks failed for the source template." }
+
 $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
@@ -93,6 +98,11 @@ $distOutput = Join-Path $Root "dist\index.html"
 $rootOutput = Join-Path $Root "media-inspector.html"
 if (-not (Test-Path -LiteralPath $rootOutput)) { throw "Root distribution HTML was not generated: media-inspector.html" }
 if ((Get-Sha256FileHex $distOutput) -ne (Get-Sha256FileHex $rootOutput)) { throw "media-inspector.html must match dist/index.html" }
+
+foreach ($artifact in @($distOutput, $rootOutput, (Join-Path $Root "dist\index.self-extract.html"))) {
+  & node $reportTestPath $artifact
+  if ($LASTEXITCODE -ne 0) { throw "Report regression checks failed for: $artifact" }
+}
 
 $manifestPath = Join-Path $Root "dist\dependency-manifest.json"
 $manifest = Get-Content -Raw -Encoding UTF8 -LiteralPath $manifestPath | ConvertFrom-Json

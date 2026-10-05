@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep JSON copy tied to the requested report and latest copy operation; obsolete fallback and feedback cannot affect a replacement report.
+- Report clipboard fallback failure accurately, remove temporary controls and restore focus, with Japanese/English Save JSON guidance.
+- Round displayed durations with correct second/minute/hour carries and show unknown durations as `—` without changing raw JSON.
+- Add source-level report regressions to repository checks for source and all three release artifacts.
+
 - Allow embedded WebAssembly in the self-extract wrapper CSP while keeping JavaScript eval and network access blocked; added a real-runtime WAV regression.
 
 - Fixed inspection cancellation during embedded runtime expansion and stale Worker/native probe results after source replacement.
