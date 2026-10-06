@@ -131,5 +131,12 @@ Japanese and English are included in the same HTML. Default is automatic based o
 
 ## Version
 
-App: 1.0.0  
+App: 1.0.1
 FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
+
+## Header consistency (v1.0.1)
+
+- Display the canonical three-part app version as `vX.Y.Z`.
+- Show `完全ローカル処理` in Japanese and `Fully local processing` in English; preserve the more detailed privacy explanations.
+- The language button shows the target language: `EN` in Japanese UI and `JA` in English UI. Its accessible name and title describe that target in the current UI language.
+- Keep Help accessible names and titles localized, without resetting work when switching languages.
