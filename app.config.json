@@ -3,7 +3,7 @@
   "name": "Media Inspector",
   "nameJa": "Media Inspector",
   "slug": "media-inspector",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Inspect video/audio details locally and save supported formats as new copies with personal metadata removed, all in one HTML file.",
   "descriptionJa": "動画・音声の詳細を端末内だけで解析し、対応形式は個人情報メタデータを削除した新しいコピーとして保存できる単一HTMLアプリです。",
   "defaultLanguage": "auto",
