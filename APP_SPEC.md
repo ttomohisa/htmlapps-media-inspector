@@ -131,7 +131,7 @@ Japanese and English are included in the same HTML. Default is automatic based o
 
 ## Version
 
-App: 1.0.1
+App: 1.0.2
 FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
 
 ## Header consistency (v1.0.1)
