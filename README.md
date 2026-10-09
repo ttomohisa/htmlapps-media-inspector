@@ -1,6 +1,6 @@
 # Media Inspector
 
-Header: v1.0.2. The privacy badge reads “Fully local processing”; the language button shows EN in Japanese and JA in English, with localized target-language and Help descriptions.
+Header: v1.0.3. The privacy badge reads “Fully local processing”; the language button shows EN in Japanese and JA in English, with localized target-language and Help descriptions.
 
 [![GitHub Pages](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

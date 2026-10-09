@@ -53,7 +53,7 @@ foreach ($relative in $buildCompatibilityFiles) {
 $app = Get-Content -Raw -Encoding UTF8 -LiteralPath (Join-Path $Root "app.config.json") | ConvertFrom-Json
 if ([string]$app.name -ne "Media Inspector") { throw "app.config.json: name must be Media Inspector" }
 if ([string]$app.slug -ne "media-inspector") { throw "app.config.json: slug must be media-inspector" }
-if ([string]$app.version -ne "1.0.2") { throw "app.config.json: version must be 1.0.2" }
+if ([string]$app.version -ne "1.0.3") { throw "app.config.json: version must be 1.0.3" }
 if ([string]$app.repository.owner -ne "ttomohisa" -or [string]$app.repository.name -ne "htmlapps-media-inspector") { throw "app.config.json: repository must be ttomohisa/htmlapps-media-inspector" }
 if (-not [bool]$app.build.blockRuntimeNetwork) { throw "Runtime network blocking must stay enabled" }
 
