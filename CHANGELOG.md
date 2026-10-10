@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4 - 2026-10-10
+
+- Keep help and confirmation dialogs inside short or zoomed viewports, with scrollable content and reachable close controls.
+- Prevent background-page scrolling while a modal is open; restore normal scrolling on dismissal.
+- Close Help when its backdrop is clicked.
+- Add source-level layout and dismissal regressions to the canonical repository check.
+
 ## 1.0.3 - 2026-10-09
 
 - Normalize the app icon background to `#16624f` with 25% corner radii, and keep the asset, header and favicon consistent without changing the artwork.
