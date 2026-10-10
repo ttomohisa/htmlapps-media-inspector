@@ -282,3 +282,5 @@ With Node.js and Playwright available, run `node --test scripts/test-inspection-
 ### Report regression checks
 
 The repository check requires Node.js 20+ as well as PowerShell. It runs `scripts/test-report-exports.cjs` against the source, readable release, root release and decoded self-extract payload. Run `node scripts/test-report-exports.cjs` for the source-only checks. The same suite also covers technical text exports, safe filenames, missing/zero values, metadata exclusion, report availability and detected container labels. These tests double browser/clipboard/download/media boundaries; native clipboard, browser focus and real-media behavior still need browser QA.
+
+Help and confirmation dialogs support short and zoomed screens: scroll inside the content, then use Close, Esc, or the backdrop to dismiss. The background page stays still while a dialog is open.

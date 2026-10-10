@@ -129,7 +129,7 @@ Do not claim a browser, device, build, or network test was performed unless it w
 
 ## Project-specific invariants
 
-- App version is `1.0.3`.
+- App version is `1.0.4`.
 - Pin FFmpeg WASM Builder Media Inspector profile v1.2.0 unless deliberately upgrading.
 - Selected media input must use WORKERFS; do not introduce `File.arrayBuffer()` for the full input.
 - Media Doctor must remain advisory and must not promise browser playback compatibility.
