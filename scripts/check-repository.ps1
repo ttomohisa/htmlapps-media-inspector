@@ -119,3 +119,7 @@ if ([string]$resolved[0].sourceSha256 -notmatch '^[0-9a-f]{64}$') { throw "Manif
 if ([string]::IsNullOrWhiteSpace([string]$resolved[0].correspondingSourceUrl)) { throw "Manifest must record corresponding-source URL" }
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
+
+# Keep internal QA/implementation prose out of user-facing help.
+& node (Join-Path $Root "tests/help-copy.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "User-facing help copy regression failed." }
