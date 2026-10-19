@@ -114,6 +114,10 @@ Media Doctor is advisory. It must not claim guaranteed compatibility. It combine
 - FFmpeg release JavaScript and WASM are gzip-compressed and embedded into the standalone HTML.
 - Metadata-cleaning output is assembled browser-side from slices of the selected `File`; no runtime network request is needed.
 
+## Drop area appearance
+
+Keep the drop area plain white without a decorative color wash or hover/drag fill. Preserve the dashed boundary, accented hover/drag border and a visible keyboard-focus outline around the file input.
+
 ## Mobile UX
 
 At widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
@@ -121,9 +125,9 @@ At widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
 - Doctor
 - Video
 - Audio
-- Details
+- Clean & save
 
-Doctor / Video / Audio / Details start disabled and become available after successful inspection; Video/Audio remain disabled when that stream type does not exist.
+Doctor / Video / Audio / Clean & save start disabled and become available after successful inspection; Video/Audio remain disabled when that stream type does not exist; Clean & save remains disabled for unsupported detected containers.
 
 ## Languages
 
@@ -131,7 +135,7 @@ Japanese and English are included in the same HTML. Default is automatic based o
 
 ## Version
 
-App: 1.0.4
+App: 1.0.5
 FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
 
 ## Header consistency (v1.0.1)
@@ -144,3 +148,17 @@ FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
 ## Dialog viewport behavior
 
 Help and confirmation dialogs remain within the current viewport at narrow widths and browser zoom. Their content scrolls without moving the header or background page. Close, Esc and backdrop dismissal preserve native modal focus restoration; normal page scrolling resumes after dismissal.
+
+
+## Safety and result ownership (v1.0.5)
+
+- Keep all previous results hidden until the new source inspection and native check finish. Cancel remains available during the native check, which is detached on cancel or replacement.
+- Cleaning eligibility follows detected container names, never filename extensions. Unknown or unsupported detected containers remain inspection-only. A mismatched extension is called out and the cleaned copy gets a matching extension and MIME type. MP4/MOV-family filenames retain a supported family extension.
+- The `matroska,webm` demuxer family is not a specific WebM signal. Keep MIME support unknown for that ambiguous family and show an informational family note; the native device probe still runs.
+- A cleaning operation owns its source, report, cancellation, reads and verifier. Cancel, page exit and stale completion cannot download a copy or publish obsolete feedback. Failed/aborted work never modifies the selected File.
+- Inspection has a 90-second budget including embedded runtime preparation; any active worker is terminated at the deadline. Cleaning has a 90-second computation budget, excluding the user's save decision. Browser/OS file reads already underway may finish internally; their late bytes are discarded.
+- Reports are limited to 4 MiB before leaving the worker, and 4,194,304 characters on the page, 1,000 streams, 10,000 chapters, 10,000 metadata entries and 65,536 characters per metadata key/value. These are conservative UI bounds, not a claim that all hostile media can be parsed within a fixed amount of memory.
+- Cleaning permits at most 100,000 visited boxes/chunks across a job and 64 MiB total MP4 zero-fill edits. Existing FLAC (1,000 blocks) and MP3 (four leading ID3 tags) limits remain. Exceeding bounds is an error, never an invitation to download unverified output.
+- Reject malformed MP4 user-data containers instead of blanking the whole container, which may contain preserved chapters. WAV cleanup requires a matching RIFF length and complete padded chunk boundaries; opaque trailing data is not rewritten.
+- All output stems share the 180-byte UTF-8, Unicode-safe sanitizer, including control and direction-control removal. JSON content is unchanged.
+- Source inspection failures remain visible beside the file, with retry through Analyze again or Another file.

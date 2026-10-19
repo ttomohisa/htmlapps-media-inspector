@@ -1,6 +1,15 @@
 # Changelog
 
-## Unreleased
+## 1.0.5 - 2026-10-19
+
+- Publish replacement results atomically after native checks; keep cancellation available until completion.
+- Select metadata cleaners from detected containers and correct mismatched output extensions and MIME types.
+- Keep ambiguous Matroska/WebM MIME support unknown instead of assuming WebM.
+- Add cancellation and ownership checks for cleaning, file reads and cleaned-copy verification.
+- Bound report expansion, cleaning time, box/chunk counts and MP4 zero-fill work; reject ambiguous malformed containers safely.
+- Apply Unicode-safe bounded filenames to every export and keep inspection errors visible.
+- Add focused lifecycle, malformed-input and byte-preservation regressions without new CI jobs.
+- Keep the drop area plain white without decorative or hover tint; retain border feedback and a visible keyboard-focus outline.
 
 - Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
 
@@ -25,8 +34,6 @@
 - Keep application processing, data formats, privacy boundaries, dependencies, and layouts unchanged.
 - Add source and generated-artifact header regressions. Real-browser verification is tracked separately.
 
-
-## Unreleased
 
 - Add Japanese/English UTF-8 technical-summary downloads for the current successful report, with sanitized filenames and metadata/chapter-title exclusion.
 - Use detected format families for container labels instead of trusting filename extensions; preserve ambiguous and unavailable formats explicitly.
@@ -54,3 +61,4 @@
 - Added a five-item smartphone bottom navigation, with the metadata clean/save action promoted to the rightmost primary action on mobile.
 - Pinned FFmpeg WASM Builder v1.2.0 Media Inspector release with SHA-256 verification and corresponding-source metadata.
 - Embedded gzip JavaScript/WASM assets and used WORKERFS for large local inputs.
+

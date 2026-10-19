@@ -48,3 +48,13 @@ test('help backdrop closes while clicks inside its bounds leave it open', () => 
   handlers.click({target:dialog,clientX:5,clientY:50});assert.equal(dialog.open,false);
   dialog.showModal();handlers.click({target:dialog,clientX:50,clientY:205});assert.equal(dialog.open,false);
 });
+
+test('drop area stays plain white while border and keyboard focus show interaction', () => {
+  assert.match(rules('.drop-zone'), /background\s*:\s*var\(--surface\)/);
+  assert.doesNotMatch(rules('.drop-zone::before'), /background|content\s*:/, 'no decorative color wash');
+  for (const selector of ['.drop-zone:hover', '.drop-zone.is-dragging']) {
+    assert.doesNotMatch(rules(selector), /background\s*:/, 'interaction must not tint the drop area');
+    assert.match(rules(selector), /border-color\s*:\s*var\(--accent\)/);
+  }
+  assert.match(rules('.drop-zone:has(input:focus-visible)'), /outline\s*:\s*3px solid/);
+});
