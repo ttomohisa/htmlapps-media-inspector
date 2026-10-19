@@ -9,6 +9,7 @@
 - Bound report expansion, cleaning time, box/chunk counts and MP4 zero-fill work; reject ambiguous malformed containers safely.
 - Apply Unicode-safe bounded filenames to every export and keep inspection errors visible.
 - Add focused lifecycle, malformed-input and byte-preservation regressions without new CI jobs.
+- Keep the drop area plain white without decorative or hover tint; retain border feedback and a visible keyboard-focus outline.
 
 - Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
 

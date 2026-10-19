@@ -114,6 +114,10 @@ Media Doctor is advisory. It must not claim guaranteed compatibility. It combine
 - FFmpeg release JavaScript and WASM are gzip-compressed and embedded into the standalone HTML.
 - Metadata-cleaning output is assembled browser-side from slices of the selected `File`; no runtime network request is needed.
 
+## Drop area appearance
+
+Keep the drop area plain white without a decorative color wash or hover/drag fill. Preserve the dashed boundary, accented hover/drag border and a visible keyboard-focus outline around the file input.
+
 ## Mobile UX
 
 At widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
