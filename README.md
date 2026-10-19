@@ -20,7 +20,7 @@ Media Inspector also includes **Media Doctor**, which combines the FFmpeg inspec
 
 GitHub Pages delivers the initial HTML. After it loads, the selected media file is inspected locally with the embedded FFmpeg 9 WebAssembly core. The file contents, metadata, and generated inspection report are not uploaded by the app.
 
-![Media Inspector in English showing the analyzed synthetic MP4, H.264 video, AAC audio, and playback diagnostics](assets/screenshot-en.png)
+![Media Inspector v1.0.5 in English with the plain-white file drop area](assets/screenshot-en.png)
 
 ## Features
 
