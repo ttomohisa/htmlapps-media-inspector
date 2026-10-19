@@ -56,3 +56,12 @@ A normal build creates:
 - `dist/dependency-manifest.json`
 - `dist/self-extract-manifest.json`
 - `media-inspector.html` (same bytes as `dist/index.html`)
+
+
+## Safety boundaries (v1.0.5)
+
+Report publication is atomic: source-generation checks and the native probe complete before any result section becomes visible. Cleaner operations snapshot the File/report pair, propagate a cancellable operation through sliced reads and nested container traversal, and ignore stale callbacks. Pending reads race an operation cancellation promise; this does not cancel an OS read already in progress.
+
+The main thread bounds report size, counts and metadata strings before rendering. The worker bounds its report before reading it into JavaScript and has a 90-second watchdog. Cleanup uses a separate 90-second budget, 100,000 total boxes/chunks and 64 MiB aggregate zero-fill cap. User confirmation time is excluded. These are defense-in-depth limits; FFmpeg can allocate memory before producing a report.
+
+The parser/ABI and embedded Builder v1.2.0 stay unchanged. FFmpeg n9.0.2 evaluation and stronger release provenance are separate work, described in SECURITY.md.

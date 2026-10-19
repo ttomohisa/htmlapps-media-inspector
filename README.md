@@ -284,3 +284,10 @@ With Node.js and Playwright available, run `node --test scripts/test-inspection-
 The repository check requires Node.js 20+ as well as PowerShell. It runs `scripts/test-report-exports.cjs` against the source, readable release, root release and decoded self-extract payload. Run `node scripts/test-report-exports.cjs` for the source-only checks. The same suite also covers technical text exports, safe filenames, missing/zero values, metadata exclusion, report availability and detected container labels. These tests double browser/clipboard/download/media boundaries; native clipboard, browser focus and real-media behavior still need browser QA.
 
 Help and confirmation dialogs support short and zoomed screens: scroll inside the content, then use Close, Esc, or the backdrop to dismiss. The background page stays still while a dialog is open.
+
+
+### Safe processing and cancellation
+
+Inspection stays cancellable through the device playback check. Metadata removal and its verification also have a Cancel button. Processing errors stay visible; Analyze again or select a locally saved file to retry. The original is never overwritten.
+
+Cleaning uses the detected container, correcting a mismatched extension on the saved copy. All output names have bounded Unicode-safe stems. Very complex metadata, malformed container boundaries, more than 100,000 boxes/chunks, over 64 MiB of MP4 zero-fill edits, or operations exceeding 90 seconds stop without a download. These conservative limits can also reject unusual valid media; they do not guarantee a fixed memory ceiling for every file. Ambiguous Matroska/WebM files rely on the device probe rather than a guessed WebM MIME.

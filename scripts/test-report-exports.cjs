@@ -401,3 +401,195 @@ for(const control of ['\u061c','\u200e','\u200f','\u2028','\u2029']){
     assert.equal((await downloadSummary(h)).name,'clip_name-inspection-summary.txt');
   });
 }
+
+
+// Safety fixes: exercise the same complete script with only asynchronous browser boundaries doubled.
+test('Replacement keeps all old results hidden until the new browser check finishes', async () => {
+  const h = await inspected(sample('OLD_PRIVATE_TITLE')), pending = deferred();
+  h.inspectWith(sample('NEW_PRIVATE_TITLE')); h.context.pendingProbe = pending.promise;
+  vm.runInContext('nativeCheck=()=>pendingProbe;', h.context);
+  const replacing = h.app.analyzeFile(file('new.webm'));
+  for(let i=0;i<8;i++) await Promise.resolve();
+  assert.equal(h.get('fileName').textContent, 'new.webm');
+  assert.equal(h.get('resultArea').hidden, true, 'old metadata and Doctor must remain hidden');
+  assert.equal(h.app.state.processing, true, 'Cancel must remain available during the native check');
+  pending.resolve({status:'playable'}); await replacing;
+  assert.equal(h.get('resultArea').hidden, false);
+  assert.doesNotMatch(h.get('metadataContent').innerHTML, /OLD_PRIVATE_TITLE/);
+  assert.match(h.get('metadataContent').innerHTML, /NEW_PRIVATE_TITLE/);
+});
+
+test('Cleaning follows detected format and keeps a matching output extension', () => {
+  const h=harness();
+  for(const [name,detected,kind,extension] of [
+    ['wrong.mp3','flac','flac','flac'], ['wrong.mp4','wav','wav','wav'],
+    ['wrong.flac','wav','wav','wav'], ['wrong.mp4','matroska,webm',null,'bin'],
+    ['unknown.mp4','',null,'bin'], ['movie.mov','mov,mp4,m4a,3gp,3g2,mj2','isobmff','mov']
+  ]) {
+    h.context.candidate={name}; h.context.detected={format:{name:detected}};
+    assert.equal(vm.runInContext('cleanerKind(candidate,detected)',h.context),kind,name);
+    h.context.kind=kind;assert.equal(vm.runInContext('cleanerOutputExtension(candidate,kind)',h.context),extension,name);
+  }
+});
+
+test('Ambiguous Matroska/WebM reports never pretend to be specifically WebM', async () => {
+  const h=await inspected(sample());
+  assert.equal(vm.runInContext('estimatedMime()',h.context),'');
+  assert.ok(vm.runInContext('buildDoctorIssues().some(x=>x.level==="info")',h.context));
+});
+
+test('Every output filename removes direction controls and bounds UTF-8 stems', async () => {
+  const h=await inspected(); h.app.state.file.name='名'.repeat(100)+'\u202efake.mp4';
+  h.get('cleanFilenameInput').value=h.app.state.file.name;
+  const names=[h.app.reportFilename(),vm.runInContext('cleanedFilename(state.file,"isobmff")',h.context)];
+  for(const name of names){ assert.doesNotMatch(name,/[\u202a-\u202e\u2066-\u2069]/); assert.ok(Buffer.byteLength(name)<=220); }
+});
+
+test('An excessive metadata value fails safely without publishing a report', async () => {
+  const h=harness();h.inspectWith(sample('x'.repeat(65537)));await h.app.analyzeFile(file('large.webm'));
+  assert.equal(h.get('resultArea').hidden,true);assert.equal(h.app.state.report,null);
+  assert.match(h.get('toast').textContent,/limit|large/i);
+});
+
+function exposeCleaning(h){vm.runInContext('app.cleanMetadata=cleanMetadata;app.cancelCleaning=typeof cancelCleaning==="function"?cancelCleaning:()=>{};',h.context)}
+test('Cancel during metadata reading prevents verification and download', async () => {
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report),pending=deferred();exposeCleaning(h);
+  h.context.pendingClean=pending.promise;vm.runInContext('sanitizeMetadataFile=()=>pendingClean;',h.context);
+  const cleaning=h.app.cleanMetadata();await h.get('appConfirmOk').click();await Promise.resolve();
+  h.app.cancelCleaning();pending.resolve({blob:new Blob(['synthetic']),changes:['LIST/INFO']});await cleaning;
+  assert.equal(h.downloads.length,0);assert.equal(h.app.state.cleaning,false);assert.equal(h.app.state.file.name,'架空.clip.webm');
+});
+test('Page exit during metadata reading cannot start a verifier or download', async () => {
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report),pending=deferred();exposeCleaning(h);
+  h.context.pendingClean=pending.promise;vm.runInContext('sanitizeMetadataFile=()=>pendingClean;',h.context);
+  const cleaning=h.app.cleanMetadata();await h.get('appConfirmOk').click();await Promise.resolve();h.context.window.dispatch('pagehide');
+  pending.resolve({blob:new Blob(['synthetic']),changes:['LIST/INFO']});await cleaning;assert.equal(h.downloads.length,0);
+});
+test('A malformed WAV declared RIFF boundary is rejected before rewriting', async () => {
+  const h=harness(),bytes=Buffer.alloc(24);bytes.write('RIFF');bytes.writeUInt32LE(4,4);bytes.write('WAVE',8);bytes.write('bext',12);bytes.writeUInt32LE(4,16);
+  h.context.wav=new File([bytes],'broken.wav',{type:'audio/wav'});
+  await assert.rejects(vm.runInContext('sanitizeWav(wav)',h.context),/RIFF|WAV/);
+});
+test('Oversized MP4 metadata zeroing aborts before allocating an output Blob', async () => {
+  const h=harness();h.context.parts=[];
+  assert.throws(()=>vm.runInContext('appendZeroParts(parts,64*1024*1024+1)',h.context),/limit|large/i);
+  assert.equal(h.context.parts.length,0);
+});
+test('Malformed MP4 user data aborts instead of blanking a container that may hold chapters', async () => {
+  const h=harness(),bytes=Buffer.alloc(9);bytes[8]=65;h.context.input=new File([bytes],'broken.mp4');h.context.edits=[];h.context.changes=[];
+  await assert.rejects(vm.runInContext('sanitizeIsoUdta(input,{start:0,headerSize:8,end:9},edits,changes)',h.context));
+  assert.equal(h.context.edits.length,0);
+});
+test('Cancel during cleaned-copy verification rejects late completion and allows replacement', async () => {
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report),pending=deferred();exposeCleaning(h);
+  h.context.pendingVerify=pending.promise;
+  vm.runInContext('sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"]),changes:["LIST/INFO"]});runInspector=()=>pendingVerify;',h.context);
+  const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();for(let i=0;i<8;i++)await Promise.resolve();
+  assert.equal(h.get('cancelCleanButton').hidden,false);h.app.cancelCleaning();
+  h.inspectWith(sample('replacement'));await h.app.analyzeFile(file('replacement.webm'));
+  pending.resolve(JSON.stringify(report));await work;
+  assert.equal(h.downloads.length,0);assert.equal(h.get('fileName').textContent,'replacement.webm');assert.equal(h.app.state.cleaning,false);
+});
+test('Cleaner timeout during verification is visible and never offers an unverified save', async () => {
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report),pending=deferred();exposeCleaning(h);
+  h.context.pendingVerify=pending.promise;vm.runInContext('sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"]),changes:["LIST/INFO"]});runInspector=()=>pendingVerify;',h.context);
+  const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();for(let i=0;i<8;i++)await Promise.resolve();
+  h.app.state.cleanOperation.abort(new Error('Processing stopped at the safety time limit.'));
+  pending.reject(new Error('Worker stopped'));await work;
+  assert.equal(h.downloads.length,0);assert.match(h.get('cleanerResult').textContent,/time limit/);assert.equal(h.get('appConfirmDialog').open,false);
+});
+test('Cancelling a pending file read settles immediately without using late bytes', async () => {
+  const h=harness(),pending=deferred();h.context.pendingBytes=pending.promise;
+  vm.runInContext('op=createCleanOperation();slow={size:8,slice:()=>({arrayBuffer:()=>pendingBytes})};',h.context);
+  const reading=vm.runInContext('readFileBytes(slow,0,8,op)',h.context);
+  vm.runInContext('op.abort(new DOMException("cancel","AbortError"))',h.context);
+  await assert.rejects(reading,{name:'AbortError'});pending.resolve(new ArrayBuffer(8));
+});
+function riffChunk(id,payload){const b=Buffer.alloc(8+payload.length+(payload.length&1));b.write(id);b.writeUInt32LE(payload.length,4);payload.copy(b,8);return b}
+function makeWav(){const fmt=Buffer.alloc(16);fmt.writeUInt16LE(1);fmt.writeUInt16LE(1,2);fmt.writeUInt32LE(8000,4);fmt.writeUInt32LE(16000,8);fmt.writeUInt16LE(2,12);fmt.writeUInt16LE(16,14);const audio=Buffer.from([0,1,2,3,4,5,6,7]),chunks=Buffer.concat([riffChunk('fmt ',fmt),riffChunk('LIST',Buffer.from('INFOprivate')),riffChunk('data',audio)]),head=Buffer.alloc(12);head.write('RIFF');head.writeUInt32LE(chunks.length+4,4);head.write('WAVE',8);return{bytes:Buffer.concat([head,chunks]),audio}}
+function isoBox(type,payload=Buffer.alloc(0)){const head=Buffer.alloc(8);head.writeUInt32BE(payload.length+8);head.write(type,4,4,'latin1');return Buffer.concat([head,payload])}
+test('Synthetic WAV cleaning preserves audio bytes, RIFF size and original bytes', async () => {
+  const h=harness(),{bytes,audio}=makeWav();h.context.media=new File([bytes],'a.wav',{type:'audio/wav'});
+  const result=await vm.runInContext('sanitizeWav(media)',h.context),out=Buffer.from(await result.blob.arrayBuffer());
+  assert.ok(out.includes(audio));assert.ok(!out.includes(Buffer.from('private')));assert.equal(out.readUInt32LE(4)+8,out.length);assert.deepEqual(Buffer.from(await h.context.media.arrayBuffer()),bytes);
+});
+test('Synthetic MP3 and FLAC cleaners preserve payload bytes without decoding',async()=>{
+  const h=harness(),audio=Buffer.from([0xff,0xfb,0x90,0x64,...Array(64).fill(23)]),tag=Buffer.alloc(14),tail=Buffer.alloc(128);tag.write('ID3');tag[3]=4;tag[9]=4;tag.write('name',10);tail.write('TAG');
+  h.context.media=new File([tag,audio,tail],'a.mp3');const mp3=await vm.runInContext('sanitizeMp3(media)',h.context);assert.deepEqual(Buffer.from(await mp3.blob.arrayBuffer()),audio);
+  const info=Buffer.alloc(38);info[3]=34;const comment=Buffer.from([0x84,0,0,4,1,2,3,4]);h.context.media=new File([Buffer.from('fLaC'),info,comment,audio],'a.flac');
+  const flac=await vm.runInContext('sanitizeFlac(media)',h.context),out=Buffer.from(await flac.blob.arrayBuffer());assert.equal(out[4],0x80);assert.deepEqual(out.subarray(42),audio);
+});
+test('Synthetic MP4 cleaning preserves mdat, chapters and fixed-size layout',async()=>{
+  const h=harness(),audio=Buffer.from([11,22,33,44,55,66]),chapter=isoBox('chpl',Buffer.from('keep chapter')),meta=isoBox('name',Buffer.from('private name')),mvhd=Buffer.alloc(24);mvhd.writeUInt32BE(123,4);mvhd.writeUInt32BE(456,8);
+  const bytes=Buffer.concat([isoBox('ftyp',Buffer.from('isom0000')),isoBox('moov',Buffer.concat([isoBox('mvhd',mvhd),isoBox('udta',Buffer.concat([chapter,meta]))])),isoBox('mdat',audio)]);
+  h.context.media=new File([bytes],'a.mp4');const result=await vm.runInContext('sanitizeIsoBmff(media)',h.context),out=Buffer.from(await result.blob.arrayBuffer());
+  assert.equal(out.length,bytes.length);assert.ok(out.includes(chapter));assert.deepEqual(out.subarray(-audio.length),audio);assert.ok(!out.includes(Buffer.from('private name')));assert.deepEqual(Buffer.from(await h.context.media.arrayBuffer()),bytes);
+});
+test('Global cleaner structure and time budgets reject work before reading more data',async()=>{
+  const h=harness(),{bytes}=makeWav();h.context.media=new File([bytes],'a.wav');
+  vm.runInContext('op=createCleanOperation();op.structures=100000;',h.context);
+  await assert.rejects(vm.runInContext('sanitizeWav(media,op)',h.context),/limit/);
+  vm.runInContext('op=createCleanOperation();op.deadline=0;',h.context);
+  await assert.rejects(vm.runInContext('sanitizeWav(media,op)',h.context),/time limit/);
+});
+
+test('Report safety limits during cleaned-copy verification never offer Save anyway', async()=>{
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report);exposeCleaning(h);
+  h.context.overLimit=JSON.stringify({...report,format:{name:'wav',metadata:{title:'x'.repeat(65537)}}});
+  vm.runInContext('sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"]),changes:["LIST/INFO"]});runInspector=async()=>overLimit;',h.context);
+  const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();for(let i=0;i<12;i++)await Promise.resolve();
+  assert.equal(h.get('appConfirmDialog').open,false,'safety rejection is not an overridable verification warning');await work;
+  assert.equal(h.downloads.length,0);assert.match(h.get('cleanerResult').textContent,/limit|large/i);
+});
+test('Detected WAV output corrects a conflicting input MIME type',async()=>{
+  const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report);exposeCleaning(h);
+  h.app.state.file.type='video/mp4';h.context.verified=JSON.stringify(report);
+  vm.runInContext('sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"],{type:"video/mp4"}),changes:["LIST/INFO"]});runInspector=async()=>verified;',h.context);
+  const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();await work;
+  assert.equal(h.downloads.length,1);assert.equal(h.downloads[0].blob.type,'audio/wav');
+});
+
+test('Worker report and processing limits cannot become an unverified save',async()=>{
+  for(const message of ['Inspection report exceeds the 4 MiB safety limit.','Processing stopped at the safety time limit.']){
+    const report=sample();report.format.name='wav';report.format.metadata={};const h=await inspected(report);exposeCleaning(h);h.context.limitMessage=message;
+    vm.runInContext('sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"]),changes:["LIST/INFO"]});runInspector=async()=>{throw safetyLimitError(limitMessage)};',h.context);
+    const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();await work;
+    assert.equal(h.get('appConfirmDialog').open,false);assert.equal(h.downloads.length,0);assert.match(h.get('cleanerResult').textContent,/limit/);
+  }
+});
+
+test('Browser support MIME follows detected WAV and FLAC over a misleading MP3 suffix',async()=>{
+  for(const [format,mime] of [['wav','audio/wav'],['flac','audio/flac']]){
+    const report=sample();report.format.name=format;const h=await inspected(report);h.app.state.file.name='wrong.mp3';
+    assert.ok(vm.runInContext('estimatedMime()',h.context).startsWith(mime));
+  }
+});
+test('Inspection timeout owns stalled runtime preparation and ignores late expansion',async()=>{
+  const h=harness(),pending=deferred(),timers=[];let workers=0;
+  h.context.window.StandaloneAssets={gunzipText:()=>pending.promise,gunzipBytes:()=>pending.promise};h.context.Worker=class{constructor(){workers++}};
+  h.context.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length};
+  const work=h.app.analyzeFile(file('slow.wav'));assert.ok(timers.some(x=>x.ms===90000),'watchdog starts before expansion');
+  timers.find(x=>x.ms===90000).fn();await work;
+  assert.equal(h.app.state.processing,false);assert.match(h.get('fileError').textContent,/time limit/);
+  pending.resolve(new Uint8Array(0));for(let i=0;i<6;i++)await Promise.resolve();assert.equal(workers,0);
+});
+test('Cleaning timeout unlocks UI even when verifier runtime expansion never settles',async()=>{
+  const h=harness(),pending=deferred(),timers=[];vm.runInContext('originalRunInspector=runInspector',h.context);
+  const report=sample();report.format.name='wav';report.format.metadata={};h.inspectWith(report);await h.app.analyzeFile(file('a.wav'));exposeCleaning(h);
+  h.context.window.StandaloneAssets={gunzipText:()=>pending.promise,gunzipBytes:()=>pending.promise};h.context.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length};
+  vm.runInContext('runInspector=originalRunInspector;sanitizeMetadataFile=async()=>({blob:new Blob(["synthetic"]),changes:["LIST/INFO"]});',h.context);
+  const work=h.app.cleanMetadata();await h.get('appConfirmOk').click();for(let i=0;i<8;i++)await Promise.resolve();
+  timers.find(x=>x.ms===90000).fn();for(let i=0;i<12;i++)await Promise.resolve();
+  assert.equal(h.app.state.cleaning,false);assert.equal(h.get('fileInput').disabled,false);await work;
+  assert.equal(h.downloads.length,0);assert.match(h.get('cleanerResult').textContent,/time limit/);
+});
+test('Cleaned MP4 MIME uses the Inspector stream schema',()=>{
+  const h=harness();for(const [type,mime]of[['video','video/mp4'],['audio','audio/mp4']]){h.context.report={streams:[{type}]};assert.equal(vm.runInContext('cleanerOutputMime({name:"a.mp4"},"isobmff",report)',h.context),mime)}
+});
+
+test('Cancelling an active worker clears owned references and settles the request',async()=>{
+  const h=harness();let terminated=0;h.context.Worker=class{postMessage(){}terminate(){terminated++}};
+  h.context.window.StandaloneAssets={gunzipText:async()=>'',gunzipBytes:async()=>new Uint8Array(8)};
+  const work=h.app.analyzeFile(file('pending.wav'));for(let i=0;i<8;i++)await Promise.resolve();assert.ok(h.app.state.worker);
+  h.app.cancelInspection();await work;assert.equal(h.app.state.worker,null);assert.equal(h.app.state.workerUrl,null);assert.equal(h.app.state.workerCancel,null);assert.equal(terminated,1);
+});
