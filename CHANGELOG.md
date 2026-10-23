@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+- Hide the informational page footer at the existing 600px smartphone breakpoint without hiding the functional bottom controls.
+
 ## 1.0.5 - 2026-10-19
 
 - Publish replacement results atomically after native checks; keep cancellation available until completion.
