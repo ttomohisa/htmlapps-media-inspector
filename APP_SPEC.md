@@ -162,3 +162,7 @@ Help and confirmation dialogs remain within the current viewport at narrow width
 - Reject malformed MP4 user-data containers instead of blanking the whole container, which may contain preserved chapters. WAV cleanup requires a matching RIFF length and complete padded chunk boundaries; opaque trailing data is not rewritten.
 - All output stems share the 180-byte UTF-8, Unicode-safe sanitizer, including control and direction-control removal. JSON content is unchanged.
 - Source inspection failures remain visible beside the file, with retry through Analyze again or Another file.
+
+## Informational footer on smartphones
+
+At the existing 600px smartphone navigation breakpoint, hide only the informational page footer. Keep the functional bottom navigation and its actions unchanged. The existing local-processing label remains `Fully local processing` in English.
