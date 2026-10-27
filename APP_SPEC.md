@@ -135,7 +135,7 @@ Japanese and English are included in the same HTML. Default is automatic based o
 
 ## Version
 
-App: 1.0.5
+App: 1.0.6
 FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
 
 ## Header consistency (v1.0.1)
@@ -166,3 +166,9 @@ Help and confirmation dialogs remain within the current viewport at narrow width
 ## Informational footer on smartphones
 
 At the existing 600px smartphone navigation breakpoint, hide only the informational page footer. Keep the functional bottom navigation and its actions unchanged. The existing local-processing label remains `Fully local processing` in English.
+
+## UI symbol consistency (v1.0.6)
+
+- Replace the local-processing lock with a decorative shield, preserving the existing Japanese/English privacy text.
+
+- Keep the complete current header version visible at 320px, 360px and 390px; only the app title may truncate, never the version or header controls.

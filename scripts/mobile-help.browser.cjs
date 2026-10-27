@@ -6,6 +6,28 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { chromium } = require('playwright');
 
+
+async function assertHeaderVersionFits(page, width, height, label) {
+  const expected = 'v' + JSON.parse(fs.readFileSync(path.resolve('app.config.json'), 'utf8')).version;
+  const version = page.locator('.app-header .version-badge, .app-header .version');
+  assert.equal(await version.count(), 1, label + ': one header version');
+  assert.equal((await version.textContent()).trim(), expected, label + ': current version');
+  assert.equal(await version.isVisible(), true, label + ': header version visible');
+  const box = await version.evaluate(el => {
+    const range = document.createRange(); range.selectNodeContents(el); const r = range.getBoundingClientRect();
+    let left = 0, right = innerWidth, top = 0, bottom = innerHeight;
+    for (let p = el; p; p = p.parentElement) {
+      const style = getComputedStyle(p), b = p.getBoundingClientRect();
+      if (/hidden|clip|auto|scroll/.test(style.overflowX)) { left = Math.max(left, b.left); right = Math.min(right, b.right); }
+      if (/hidden|clip|auto|scroll/.test(style.overflowY)) { top = Math.max(top, b.top); bottom = Math.min(bottom, b.bottom); }
+    }
+    const actions = document.querySelector('.header-actions').getBoundingClientRect();
+    return { x:r.left, y:r.top, right:r.right, bottom:r.bottom, width:r.width, height:r.height, left, clipRight:right, top, clipBottom:bottom,
+      overlapsActions: r.left < actions.right && r.right > actions.left && r.top < actions.bottom && r.bottom > actions.top };
+  });
+  assert.ok(box.width > 0 && box.height > 0 && box.x >= box.left - .5 && box.right <= box.clipRight + .5 && box.y >= box.top - .5 && box.bottom <= box.clipBottom + .5 && !box.overlapsActions, label + ': full version glyphs fit viewport/ancestor clips without action overlap ' + JSON.stringify(box));
+}
+
 async function main() {
   const results = path.resolve(__dirname, '..', 'test-results', 'mobile-help');
   fs.mkdirSync(results, { recursive: true });
@@ -13,7 +35,7 @@ async function main() {
   try {
     for (const file of ['dist/index.html', 'dist/index.self-extract.html', 'media-inspector.html']) {
       for (const language of ['ja', 'en']) {
-        for (const [width, height] of [[1360, 900], [601, 568], [600, 568], [360, 640], [320, 568], [393, 252]]) {
+        for (const [width, height] of [[1360, 900], [601, 568], [600, 568], [360, 640], [390, 844], [320, 568], [393, 252]]) {
           const context = await browser.newContext({ viewport: { width, height }, locale: language, reducedMotion: 'reduce' });
           const page = await context.newPage();
           const errors = [], requests = [];
@@ -25,7 +47,11 @@ async function main() {
             await page.goto(pathToFileURL(path.resolve(__dirname, '..', file)).href);
             await page.locator('#helpButton').waitFor();
             if (await page.locator('html').getAttribute('lang') !== language) await page.locator('#languageButton').click();
+            await assertHeaderVersionFits(page, width, height, label);
+            if(file==='dist/index.html'&&[1360,320,360,390].includes(width))await page.screenshot({path:path.join(results,`main-${language}-${width}.png`)});
             assert.equal(await page.locator('[data-i18n="localOnly"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
+            assert.equal(await page.locator('.privacy-chip svg[aria-hidden="true"]').count(), 1, label + ': decorative shield');
+            assert.match(await page.locator('.privacy-chip svg path').first().getAttribute('d'), /^M12 3 /, label + ': shield outline');
             assert.equal(await page.locator('.privacy-chip').isVisible(), width > 760, label + ': existing badge hiding preserved');
             if (width > 760) assert.ok(await page.locator('.privacy-chip').evaluate(el => {
               const box = el.getBoundingClientRect();
