@@ -48,6 +48,7 @@ async function main() {
             await page.locator('#helpButton').waitFor();
             if (await page.locator('html').getAttribute('lang') !== language) await page.locator('#languageButton').click();
             await assertHeaderVersionFits(page, width, height, label);
+            if(file==='dist/index.html'&&[1360,320,360,390].includes(width))await page.screenshot({path:path.join(results,`main-${language}-${width}.png`)});
             assert.equal(await page.locator('[data-i18n="localOnly"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
             assert.equal(await page.locator('.privacy-chip svg[aria-hidden="true"]').count(), 1, label + ': decorative shield');
             assert.match(await page.locator('.privacy-chip svg path').first().getAttribute('d'), /^M12 3 /, label + ': shield outline');
