@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Verify the complete current header version at narrow phone widths; reserve space for the version beside truncated app titles.
+
+- 1.0.6: Replace the local-processing lock with a decorative shield, preserving the existing Japanese/English privacy text.
+
 ### Changed
 - Hide the informational page footer at the existing 600px smartphone breakpoint without hiding the functional bottom controls.
 
