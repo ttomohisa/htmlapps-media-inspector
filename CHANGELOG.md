@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep the final Help closing guidance reachable on short windows.
+
 - Verify the complete current header version at narrow phone widths; reserve space for the version beside truncated app titles.
 
 - 1.0.6: Replace the local-processing lock with a decorative shield, preserving the existing Japanese/English privacy text.
