@@ -36,7 +36,7 @@ function harness() {
   const state = { language: 'ja', report: { streams: [{ index: 0 }] }, points: [{id:'p1',px:1.25,py:2.5}], selectedId:'p1' };
   const context = vm.createContext({ document, languageButton, els:{languageButton}, state, translations, I18N:translations, APP_CONFIG:config,
     BUILD_MANIFEST:{generatedAtUtc:'2026-10-06T00:00:00Z',dependencies:[]}, touchDraft:null, $:get,
-    render(){}, renderReport(){}, renderSeriesList(){}, updatePointCoordinateDraft(){} });
+    AppConfirm:{refresh(){}},renderCommonUi(){},render(){}, renderReport(){}, renderSeriesList(){}, updatePointCoordinateDraft(){} });
   vm.runInContext(`let language='ja'; function translate(key){return translations[language][key];} ${applySource};globalThis.switchTo=next=>{language=next;applyLanguage(next);};`,context);
   return {get,document,state,nodes,switchTo:context.switchTo};
 }

@@ -1,4 +1,4 @@
-param([switch]$ForceDownload)
+﻿param([switch]$ForceDownload)
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
@@ -123,3 +123,6 @@ Write-Host "[OK] Repository check passed." -ForegroundColor Green
 # Keep internal QA/implementation prose out of user-facing help.
 & node (Join-Path $Root "tests/help-copy.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "User-facing help copy regression failed." }
+
+& node (Join-Path $Root "scripts/test-ui-release.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Common UI release checks failed." }

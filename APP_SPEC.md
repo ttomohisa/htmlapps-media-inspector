@@ -172,3 +172,16 @@ At the existing 600px smartphone navigation breakpoint, hide only the informatio
 - Replace the local-processing lock with a decorative shield, preserving the existing Japanese/English privacy text.
 
 - Keep the complete current header version visible at 320px, 360px and 390px; only the app title may truncate, never the version or header controls.
+
+## Common UI conventions v1
+
+- Shared language resolves valid URL `lang`, common preference, first supported browser language, then English. Startup performs no storage write; explicit changes save only `browser-kitty:ui-language:v1`. Storage failure keeps the screen language with a visible notice.
+- Media, reports and filename drafts are session-only. The page and Help distinguish JSON/technical-report downloads from a new cleaned media copy; neither restores a project. Originals remain unchanged.
+- JSON and summary filenames can be edited alongside the fixed extension. Existing sanitized source-based defaults (including their purpose suffix), 180-byte Unicode-safe stem behavior and raw JSON/summary contents remain unchanged. Edited names survive language changes and same-source reanalysis.
+- Handoff says download started; the browser owns destination/completion. Copy and report-download errors persist separately until that operation succeeds or the source is replaced; delivery always removes its temporary anchor and releases its URL after a delay.
+- Pending copy prevents duplicate requests for that report. Source generation and captured text still reject stale completion/fallback. Inspection/cleaning preserve their existing real cancellation semantics. Shared button states reflect actual readiness and work.
+- Replacing results identifies both file names, explicitly says the original stays unchanged and the screen result cannot be undone, defaults to Cancel, and binds consent to the current generation. Open confirmations translate captured scope in place.
+- Language changes preserve current file/report/name/processing and expanded result details, while translating persistent errors and operation status.
+- Existing reanalysis invalidates prior inspection results before work and does not retain a prior cleaned Blob for a second download: this source-ownership rule remains an explicit S4 exception. Retry operates on the retained original File. Smartphone navigation keeps its existing layout; dense navigation choices are distinct from action buttons.
+
+Native acceptance still requires real readable/self-extract local opening, save destination/name/content, clipboard fallback, keyboard/dialog focus, 320/360px layout and assistive-technology feedback. Source/VM checks do not complete that acceptance.

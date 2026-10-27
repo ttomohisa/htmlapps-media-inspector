@@ -71,3 +71,9 @@
 - Pinned FFmpeg WASM Builder v1.2.0 Media Inspector release with SHA-256 verification and corresponding-source metadata.
 - Embedded gzip JavaScript/WASM assets and used WORKERFS for large local inputs.
 
+
+## Unreleased — common UI conventions
+
+- Pin common UI v1.0.0 for session retention, native action states, scoped confirmation and shared language.
+- Add editable JSON/summary filenames, persistent independent delivery failures and honest download-start feedback.
+- Preserve names/details/errors during language changes; bind replacement consent to its source and release temporary copy/download resources on failures.

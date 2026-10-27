@@ -291,3 +291,7 @@ Help and confirmation dialogs support short and zoomed screens: scroll inside th
 Inspection stays cancellable through the device playback check. Metadata removal and its verification also have a Cancel button. Processing errors stay visible; Analyze again or select a locally saved file to retry. The original is never overwritten.
 
 Cleaning uses the detected container, correcting a mismatched extension on the saved copy. All output names have bounded Unicode-safe stems. Very complex metadata, malformed container boundaries, more than 100,000 boxes/chunks, over 64 MiB of MP4 zero-fill edits, or operations exceeding 90 seconds stop without a download. These conservative limits can also reject unusual valid media; they do not guarantee a fixed memory ceiling for every file. Ambiguous Matroska/WebM files rely on the device probe rather than a guessed WebM MIME.
+
+### Saving and language
+
+Files, results and output names stay only in the current tab. Edit the JSON report, technical-summary or cleaned-copy name before downloading; the browser controls the destination and completion. Failed copy/download actions leave visible retry guidance. Language changes preserve your work and expanded details and share a preference with compatible tools on the same browser origin. There is no automatic media saving or restorable project file.

@@ -17,7 +17,7 @@ const script = source.match(/<script>\s*('use strict';[\s\S]*?)<\/script>/)[1]
 const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
 const sample = (title = 'Fictional A', duration = 61.125) => ({ schemaVersion: 1, format: { name: 'matroska,webm', duration, fileSize: 24, streamCount: 1, metadata: { title } }, streams: [{ index: 0, type: 'audio', duration, codec: { name: 'opus' }, audio: { sampleRate: 48000, channels: 2, channelLayout: 'stereo' } }], chapters: [] });
 const file = name => ({ name, type: 'video/webm', size: 24 });
-function harness(){
+function harness(options={}){
  const nodes=new Map(),created=[],clipboardWrites=[],fallbackWrites=[],downloads=[],urls=new Map(),revoked=[];let next=0,selected,clipboard=async()=>{},fallback=()=>true;
  class Element{
   constructor(id=''){Object.assign(this,{id,textContent:'',innerHTML:'',value:'',className:'',disabled:false,hidden:false,open:false,dataset:{},style:{},events:{},isConnected:true,attributes:{},children:[]});const c=new Set();this.classList={add:x=>c.add(x),remove:x=>c.delete(x),contains:x=>c.has(x),toggle:(x,v)=>v?c.add(x):c.delete(x)}}
@@ -43,7 +43,9 @@ function harness(){
  const get=id=>{if(!nodes.has(id)){const node=new Element(id);const tag=source.match(new RegExp('<[^>]+id="'+id+'"[^>]*>'));node.disabled=Boolean(tag&&/\bdisabled(?:[\s=>])/.test(tag[0]));nodes.set(id,node)}return nodes.get(id)};
  const document={getElementById:get,querySelectorAll:()=>[],documentElement:new Element('html'),body:new Element('body'),activeElement:null,createElement:tag=>{const e=new Element();e.tag=tag;created.push(e);return e},execCommand:command=>{assert.equal(command,'copy');fallbackWrites.push(selected?.value);return fallback()}};
  const window={innerWidth:1000,matchMedia:()=>({matches:false}),events:{},addEventListener(type,fn){(this.events[type]||=[]).push(fn)},dispatch(type){for(const fn of this.events[type]||[])fn()}};
- const context=vm.createContext({document,window,navigator:{language:'en',clipboard:{writeText:text=>{clipboardWrites.push(text);return clipboard(text)}}},Blob,File,HTMLElement:Element,TextEncoder,TextDecoder,Uint8Array,DOMException,URL:{createObjectURL:blob=>{const url='blob:synthetic/'+ ++next;urls.set(url,blob);return url},revokeObjectURL:url=>{revoked.push(url);urls.delete(url)}},requestAnimationFrame:f=>f(),setTimeout:()=>++next,clearTimeout(){},console});
+ const context=vm.createContext({document,window,navigator:{language:'en',clipboard:{writeText:text=>{clipboardWrites.push(text);return clipboard(text)}}},Blob,File,HTMLElement:Element,TextEncoder,TextDecoder,Uint8Array,DOMException,URL:Object.assign(class extends URL {},{createObjectURL:blob=>{const url='blob:synthetic/'+ ++next;urls.set(url,blob);return url},revokeObjectURL:url=>{revoked.push(url);urls.delete(url)}}),requestAnimationFrame:f=>f(),setTimeout:()=>++next,clearTimeout(){},console});
+ context.localStorage=options.storage;context.location={href:options.url||'https://example.test/'};context.navigator.languages=options.languages||['en'];context.history={replaceState(){}};
+ vm.runInContext(fs.readFileSync(path.join(__dirname,'../components/ui-conventions.js'),'utf8'),context);
  vm.runInContext(script,context,{filename:'exact-source-script.js'});
  vm.runInContext('globalThis.app={state,els,analyzeFile,acceptCandidate,cancelInspection,resetResult,copyJson,saveJson,reportFilename,formatDuration,formatBytes,renderReport,renderStreams,applyLanguage,streamsOf};',context);
  const inspectWith=report=>{context.inspectorResult=JSON.stringify(report);vm.runInContext('runInspector=async()=>inspectorResult;nativeCheck=async()=>({status:"playable"});',context)};
@@ -119,13 +121,11 @@ test('Reanalysis then Cancel invalidates an older copy even when retry uses the 
 });
 
 for (const outcome of ['resolve', 'reject']) {
-  test(`Only the latest overlapping copy owns ${outcome} feedback and fallback`, async () => {
-    const h = await inspected(), old = deferred(); h.clipboard(() => old.promise); const first = h.app.copyJson();
-    h.clipboard(async () => { throw new Error('unavailable'); }); h.fallback(() => false); await h.app.copyJson();
-    const feedback = h.app.els.toast.textContent; assert.match(feedback, /Could not copy/);
-    old[outcome](new Error('old rejection')); await first;
-    assert.equal(h.fallbackWrites.length, 1); assert.equal(h.app.els.toast.textContent, feedback); noTextarea(h);
-  });
+ test(`Pending copy rejects duplicate and owns its ${outcome} feedback`,async()=>{
+  const h=await inspected(),old=deferred();h.clipboard(()=>old.promise);const first=h.app.copyJson();h.fallback(()=>false);await h.app.copyJson();
+  assert.equal(h.clipboardWrites.length,1);assert.equal(h.get('copyJsonButton').attributes['data-bk-state'],'busy');old[outcome](new Error('rejection'));await first;
+  assert.equal(h.fallbackWrites.length,outcome==='reject'?1:0);assert.match(h.app.els.toast.textContent,outcome==='reject'?/Could not copy/:/JSON copied/);assert.equal(h.get('copyJsonButton').disabled,false);noTextarea(h);
+ });
 }
 
 for (const failure of ['false', 'throw']) {
@@ -371,10 +371,10 @@ for(const language of ['en','ja']){
     const h=await inspected();h.app.applyLanguage(language);
     const create=h.document.createElement;
     h.document.createElement=tag=>{const e=create(tag);if(tag==='a')e.click=()=>{throw new Error('synthetic download failure')};return e};
-    const revoked=h.revoked.length;
+    const revoked=h.revoked.length,timers=[];h.context.setTimeout=(fn,ms)=>{timers.push({fn,ms});return timers.length};
     await assert.doesNotReject(h.get('saveSummaryButton').click());
-    assert.equal(h.revoked.length,revoked+1);assert.equal(h.downloads.length,0);
-    assert.match(h.app.els.toast.textContent,language==='en'?/Could not save/:/保存できません/);
+    assert.equal(h.revoked.length,revoked);assert.equal(h.downloads.length,0);const cleanup=timers.find(x=>x.ms===1500);assert.ok(cleanup);cleanup.fn();assert.equal(h.revoked.length,revoked+1);
+    assert.match(h.app.els.toast.textContent,language==='en'?/Could not start/:/保存を開始できません/);
     assert.equal(h.created.at(-1).removed,true);
     h.document.createElement=create;await downloadSummary(h);
   });
@@ -592,4 +592,37 @@ test('Cancelling an active worker clears owned references and settles the reques
   h.context.window.StandaloneAssets={gunzipText:async()=>'',gunzipBytes:async()=>new Uint8Array(8)};
   const work=h.app.analyzeFile(file('pending.wav'));for(let i=0;i<8;i++)await Promise.resolve();assert.ok(h.app.state.worker);
   h.app.cancelInspection();await work;assert.equal(h.app.state.worker,null);assert.equal(h.app.state.workerUrl,null);assert.equal(h.app.state.workerCancel,null);assert.equal(terminated,1);
+});
+
+// Common UI regressions execute the actual controller and adapters.
+test('common language resolves without startup writes and explicit changes write only shared preference',()=>{
+ const values=new Map([['browser-kitty:ui-language:v1','ja']]),writes=[];const storage={getItem:k=>values.get(k)||null,setItem(k,v){writes.push(k);values.set(k,v)}};
+ const h=harness({storage,languages:['fr','en']});assert.equal(h.app.state.language,'ja');assert.deepEqual(writes,[]);h.get('languageButton').click();assert.equal(values.get('browser-kitty:ui-language:v1'),'en');assert.deepEqual(writes,['browser-kitty:ui-language:v1']);
+ const url=harness({storage,url:'https://example.test/?lang=ja'});assert.equal(url.app.state.language,'ja');
+});
+test('report output names survive language and same-source reanalysis and normalize their extension',async()=>{
+ const h=await inspected();h.get('jsonFilenameInput').value='custom/name.json';h.get('summaryFilenameInput').value='summary-name.txt';h.app.applyLanguage('ja');h.app.saveJson();vm.runInContext('saveSummary()',h.context);
+ assert.equal(h.downloads[0].name,'custom_name.json');assert.equal(h.downloads[1].name,'summary-name.txt');await h.app.analyzeFile(h.app.state.file);assert.equal(h.get('jsonFilenameInput').value,'custom/name.json');
+});
+test('report download failure remains visible through language and other output success until retry',async()=>{
+ const h=await inspected(),create=h.document.createElement;h.document.createElement=tag=>{const e=create(tag);if(tag==='a')e.click=()=>{throw Error('delivery denied')};return e};
+ h.app.saveJson();assert.match(h.get('deliveryStatus').textContent,/JSON/);assert.equal(h.document.body.children.length,0);h.app.applyLanguage('ja');assert.match(h.get('deliveryStatus').textContent,/保存を開始できません/);
+ h.document.createElement=create;vm.runInContext('saveSummary()',h.context);assert.match(h.get('deliveryStatus').textContent,/JSON/);h.app.saveJson();assert.equal(h.get('deliveryStatus').hidden,true);
+});
+test('replacement consent is bound to source generation and identifies retained external file',async()=>{
+ const h=await inspected();const replacing=h.app.acceptCandidate(file('B.webm'));assert.match(h.get('appConfirmMessage').textContent,/架空.clip.webm/);assert.equal(h.document.activeElement,h.get('appConfirmCancel'));
+ await h.app.analyzeFile(file('C.webm'));await h.get('appConfirmOk').click();await replacing;assert.equal(h.app.state.file.name,'C.webm');
+});
+
+test('denied language persistence is visible and never drops report, names or delivery errors',async()=>{
+ const h=harness({storage:{getItem(){throw Error('blocked')},setItem(){throw Error('blocked')}},languages:['fr','ja']});assert.equal(h.app.state.language,'ja');h.inspectWith(sample());await h.app.analyzeFile(file('retained.wav'));const text=h.app.state.reportText;h.get('jsonFilenameInput').value='draft';h.fallback(()=>false);h.context.navigator.clipboard=undefined;await h.app.copyJson();await h.get('languageButton').click();assert.equal(h.app.state.language,'en');assert.equal(h.get('languageNotice').hidden,false);assert.match(h.get('deliveryStatus').textContent,/Could not copy/);assert.equal(h.app.state.reportText,text);assert.equal(h.get('jsonFilenameInput').value,'draft');
+});
+test('open replacement confirmation translates captured names and cancel keeps current work',async()=>{
+ const h=await inspected();const text=h.app.state.reportText;h.get('jsonFilenameInput').value='draft';const operation=h.app.acceptCandidate(file('candidate.wav'));h.app.applyLanguage('ja');assert.match(h.get('appConfirmMessage').textContent,/架空.clip.webm.*→.*candidate.wav/);assert.equal(h.get('appConfirmCancel').textContent,'キャンセル');await h.get('appConfirmCancel').click();await operation;assert.equal(h.app.state.reportText,text);assert.equal(h.get('jsonFilenameInput').value,'draft');
+});
+for(const changeFocus of [false,true])test(`clipboard selection failure cleans temporary node without stealing later focus ${changeFocus}`,async()=>{
+ const h=await inspected();h.context.navigator.clipboard=undefined;h.get('copyJsonButton').focus();const create=h.document.createElement,newer=h.get('summaryFilenameInput');h.document.createElement=tag=>{const el=create(tag);if(tag==='textarea')el.select=()=>{if(changeFocus)newer.focus();throw Error('cannot select')};return el};await h.app.copyJson();noTextarea(h);assert.match(h.get('deliveryStatus').textContent,/Could not copy/);assert.equal(h.document.activeElement,changeFocus?newer:h.get('copyJsonButton'));
+});
+test('inspection error and cancellation controls translate without changing its source',async()=>{
+ const h=harness();vm.runInContext('runInspector=async()=>{throw new Error(t("fileReadFailed"))}',h.context);const media=file('unreadable.wav');await h.app.analyzeFile(media);assert.match(h.get('fileError').textContent,/could not be read/);h.app.applyLanguage('ja');assert.match(h.get('fileError').textContent,/読み取れません/);assert.equal(h.app.state.file,media);assert.equal(h.get('reanalyzeButton').disabled,false);assert.equal(h.get('saveJsonButton').disabled,true);
 });

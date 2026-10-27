@@ -65,3 +65,7 @@ Report publication is atomic: source-generation checks and the native probe comp
 The main thread bounds report size, counts and metadata strings before rendering. The worker bounds its report before reading it into JavaScript and has a 90-second watchdog. Cleanup uses a separate 90-second budget, 100,000 total boxes/chunks and 64 MiB aggregate zero-fill cap. User confirmation time is excluded. These are defense-in-depth limits; FFmpeg can allocate memory before producing a report.
 
 The parser/ABI and embedded Builder v1.2.0 stay unchanged. FFmpeg n9.0.2 evaluation and stronger release provenance are separate work, described in SECURITY.md.
+
+## Common UI adapter
+
+The builder embeds exact local `components/ui-conventions.js` and `.css` using `scripts/embed-ui-conventions.ps1` and the fixed hash lock. No new runtime dependency is loaded. The app retains ownership of source/worker generations and cleaner algorithms. A small UI adapter reports real operation state and domain-specific delivery failures; shared language uses no media persistence. Native modal behavior is retained and its pending options can rerender translations without resolving consent.
