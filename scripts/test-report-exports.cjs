@@ -244,6 +244,17 @@ async function downloadSummary(h) {
   return { ...download, text };
 }
 
+test('Overview exposes primary video and audio quality together without inspecting cover art', async () => {
+  const report = technicalFixture();
+  report.streams.unshift({...coverStream, index: 6});
+  const h = await inspected(report);
+  const facts = h.get('overviewGrid').innerHTML;
+  for (const value of ['MP4 / MOV', 'H.264', '1920 × 1080', '29.97 fps', 'AAC', '48 kHz', 'Stereo', 'Inferred']) {
+    assert.ok(facts.includes(value), value);
+  }
+  assert.doesNotMatch(facts, /90000|PRIVATE_/);
+});
+
 test('Summary action is a disabled native button in Basic information with localized copy', () => {
   const section = source.match(/<section[^>]+id="overviewSection"[\s\S]*?<\/section>/)[0];
   assert.match(section, /<button[^>]+id="saveSummaryButton"[^>]+type="button"[^>]*disabled/);

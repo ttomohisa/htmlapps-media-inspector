@@ -61,7 +61,7 @@ async function main() {
                 && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
             }), label + ': badge text fits');
             assert.equal(await page.locator('footer').isVisible(), width > 600, label);
-            assert.equal(await page.locator('.mobile-nav').isVisible(), width <= 600, label + ': functional navigation preserved');
+            assert.equal(await page.locator('.mobile-nav').isVisible(), false, label + ': report actions wait for a file');
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
 

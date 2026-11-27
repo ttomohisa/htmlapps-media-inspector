@@ -1,7 +1,5 @@
 # Media Inspector
 
-Header: v1.0.3. The privacy badge reads “Fully local processing”; the language button shows EN in Japanese and JA in English, with localized target-language and Help descriptions.
-
 [![GitHub Pages](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-media-inspector/)
@@ -20,7 +18,7 @@ Media Inspector also includes **Media Doctor**, which combines the FFmpeg inspec
 
 GitHub Pages delivers the initial HTML. After it loads, the selected media file is inspected locally with the embedded FFmpeg 9 WebAssembly core. The file contents, metadata, and generated inspection report are not uploaded by the app.
 
-![Media Inspector v1.0.5 in English with the plain-white file drop area](assets/screenshot-en.png)
+![English report showing the detected format, video resolution, frame rate and codec](assets/screenshot-en.png)
 
 ## Features
 
@@ -46,7 +44,7 @@ GitHub Pages delivers the initial HTML. After it loads, the selected media file 
 - Cancel inspection during preparation or processing, then inspect again or choose another file
 - Japanese and English UI in the same HTML
 - Responsive desktop and mobile layout
-- Smartphone bottom navigation for File / Doctor / Video / Audio / Details
+- Smartphone shortcuts for File, Doctor, Video, Audio and Clean & save after file selection
 - Embedded SVG favicon
 - WORKERFS input so the selected file is not copied wholesale into WASM memory
 - Gzip-compressed embedded FFmpeg JavaScript and WebAssembly
@@ -76,21 +74,11 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 
 ## Usage
 
-On phones, the format, duration and main video or audio specifications appear above Media Doctor. Album covers appear under **Subtitles & other** and in the technical summary as **Cover art**. Files containing only subtitles or attachments have no audio or video track to check for playback.
-
-The metadata cleaner groups candidate fields by category, including dates and locations. When re-inspection confirms all of those candidates are gone, the result names the categories and counts.
-
-1. Choose a video or audio file, or drop it onto the file area.
-2. Media Inspector mounts the browser `File` into the FFmpeg Worker through WORKERFS and starts inspection automatically.
-3. Check **Media Doctor** first if you are troubleshooting browser playback.
-4. Review **Basic information** for the container, duration, bitrate, and stream counts.
-5. Review the **Video** and **Audio** cards for codec-specific details.
-6. Open **Subtitles & other** when the file contains additional streams.
-7. Use **Remove metadata & save** when you want a new cleaned copy. The original stays unchanged; the cleaned file is re-inspected before download.
-8. Open **Details** to review metadata, chapters, the complete raw JSON report, and engine information.
-9. Use **Copy JSON** or **Save JSON** when you need the structured result outside the app.
-
-Use **Save technical summary** in **Basic information** for a UTF-8 `.txt` report of container/format, size, duration, bitrate and each video, audio, subtitle, data or attachment stream. Labels follow the selected language. The summary excludes metadata values, chapter titles, source filenames in its text and playback judgments. Its download name is based on the source filename, so check it for personal details before sharing.
+1. Choose or drop a media file. Select **Inspect sample** to try a three-second WAV generated on your device.
+2. **Overview** shows the detected container, duration, total bitrate, primary video and audio specifications, and Media Doctor. Expand **File details** for stream counts and detected format names.
+3. **Tracks** lists detected streams. Album covers appear as cover art and are excluded from video FPS.
+4. **Privacy** groups metadata candidates by category. Save a cleaned copy of a supported file to see which categories and counts were confirmed removed by re-inspection.
+5. **Details** contains metadata, chapters and the complete JSON report. For a shareable UTF-8 text report, choose **Save technical summary** in Overview. The text contains technical facts only. Check the download filename before sharing.
 
 Container labels follow the format detected by the inspector, even when a file has the wrong extension. Ambiguous families remain **MP4 / MOV** or **Matroska / WebM**; an unavailable format shows `—`.
 

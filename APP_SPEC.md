@@ -8,15 +8,15 @@ Inspect common video/audio files locally and present technical media facts in a 
 
 - Treat video streams marked `disposition.attachedPicture` as cover art in the UI and text export. Keep their original stream indices and JSON. Exclude cover images from playback selection, video FPS, the video count and the mobile Video shortcut.
 - When the report has no audio or moving video, skip both browser checks and show a neutral “not applicable” diagnosis.
-- At the smartphone breakpoint, put detected container, available duration and primary video or audio facts at the start of the diagnosis scroll target.
+- Show detected format, duration and bitrate above primary video and audio specifications in Overview. Keep the measured values and qualifiers available without opening Tracks. On phones, also place a compact summary below the selected filename.
 - Count plain `date` tags, including WAV creation dates, among privacy candidates. Show localized category counts before cleaning and after verified removal, without exposing their values in the result message.
 
-1. User chooses or drops one media file.
+1. User chooses or drops one media file, or inspects the built-in three-second PCM WAV. The sample, its date tag and its waveform are generated locally.
 2. The app automatically starts the compact FFmpeg WASM Media Inspector runner.
 3. The browser `File` is mounted through WORKERFS; the app does not call `File.arrayBuffer()` for the whole inspection input.
 4. The runner writes `/report.json` containing format, stream, HDR, metadata, subtitle, chapter and audio information.
 5. The app runs browser-side playback hints (`canPlayType()` and a local native media probe).
-6. The result is shown as Media Doctor, metadata cleaner, overview, Video, Audio, subtitle/other and Details sections.
+6. New reports open on Overview. Four keyboard-accessible tabs switch between Overview (including Media Doctor), Tracks, Privacy and Details. Only detected stream groups appear in Tracks. Each file starts with Overview selected.
 7. For MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV, the user can create a cleaned copy without re-encoding the audio/video payload. On smartphones, the clean/save action is exposed directly in the fixed bottom action bar; the filename editor remains in the cleaner section.
 8. Before download, the cleaned copy is re-inspected with the same FFmpeg WASM inspector. If privacy-like metadata is still detected, the app warns instead of claiming complete removal.
 9. User can copy or save the structured JSON report, or save a localized technical text summary from Basic information, independently of metadata cleaning.
@@ -125,7 +125,7 @@ Keep the drop area plain white without a decorative color wash or hover/drag fil
 
 ## Mobile UX
 
-At widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
+After selecting a file, at widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
 - File
 - Doctor
 - Video
