@@ -74,7 +74,7 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 
 ## Usage
 
-1. Choose or drop a media file. Select **Inspect sample** to try a three-second WAV generated on your device.
+1. Select **Open file** to inspect a video or audio file. On desktop you can also drop it beside the button. **Try a sample WAV** opens a three-second recording generated on your device.
 2. **Overview** shows the detected container, duration, total bitrate, primary video and audio specifications, and Media Doctor. Expand **File details** for stream counts and detected format names.
 3. **Tracks** lists detected streams. Album covers appear as cover art and are excluded from video FPS.
 4. **Privacy** groups metadata candidates by category. Save a cleaned copy of a supported file to see which categories and counts were confirmed removed by re-inspection.

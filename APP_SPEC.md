@@ -11,7 +11,7 @@ Inspect common video/audio files locally and present technical media facts in a 
 - Show detected format, duration and bitrate above primary video and audio specifications in Overview. Keep the measured values and qualifiers available without opening Tracks. On phones, also place a compact summary below the selected filename.
 - Count plain `date` tags, including WAV creation dates, among privacy candidates. Show localized category counts before cleaning and after verified removal, without exposing their values in the result message.
 
-1. User chooses or drops one media file, or inspects the built-in three-second PCM WAV. The sample, its date tag and its waveform are generated locally.
+1. The opening screen has one file picker followed by a link to inspect a three-second PCM WAV and a short format reference. The picker accepts all file types so that media with an unfamiliar extension is selectable. The sample and its date tag are generated locally when requested.
 2. The app automatically starts the compact FFmpeg WASM Media Inspector runner.
 3. The browser `File` is mounted through WORKERFS; the app does not call `File.arrayBuffer()` for the whole inspection input.
 4. The runner writes `/report.json` containing format, stream, HDR, metadata, subtitle, chapter and audio information.
@@ -121,7 +121,7 @@ Media Doctor is advisory. It must not claim guaranteed compatibility. It combine
 
 ## Drop area appearance
 
-Keep the drop area plain white without a decorative color wash or hover/drag fill. Preserve the dashed boundary, accented hover/drag border and a visible keyboard-focus outline around the file input.
+Present one column at all sizes. Desktop users can click the open-file button or drop a file within its dashed boundary. On narrow screens make the button full width. Preserve visible keyboard focus and drag feedback. Keep the opening screen and results legible in tall portrait windows that use a desktop layout width.
 
 ## Mobile UX
 

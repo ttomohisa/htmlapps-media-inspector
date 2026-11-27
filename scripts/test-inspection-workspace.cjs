@@ -4,7 +4,12 @@ const {pathToFileURL} = require('node:url');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
 async function check(browser, artifact, width, locale) {
-  const page = await browser.newPage({viewport:{width, height:844}, locale, reducedMotion:'reduce'});
+  const portraitDesktopWidth = width === 980;
+  const touch = width <= 600 || portraitDesktopWidth;
+  const page = await browser.newPage({
+    viewport:{width, height:portraitDesktopWidth ? 1880 : 844},
+    isMobile:touch, hasTouch:touch, locale, reducedMotion:'reduce'
+  });
   const errors = [], requests = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('request', request => { if (/^https?:/.test(request.url())) requests.push(request.url()); });
@@ -13,6 +18,21 @@ async function check(browser, artifact, width, locale) {
     const sample = page.locator('#inspectSample');
     await sample.waitFor({timeout:3000});
     assert.equal(await page.locator('#mobileNav').isVisible(), false);
+    const picker = page.locator('#fileInput');
+    const pickerBox = await picker.boundingBox();
+    const buttonBox = await page.locator('.choose-file').boundingBox();
+    const sampleBox = await sample.boundingBox();
+    assert.ok(sampleBox.y >= pickerBox.y + pickerBox.height - 1, 'sample follows the picker');
+    if (touch) {
+      const scale = portraitDesktopWidth ? width / 390 : 1;
+      assert.ok(buttonBox.width >= width * .85, 'file button uses the available width');
+      assert.ok(buttonBox.height / scale >= 44, 'file button keeps a phone-sized touch target');
+    }
+    await page.bringToFront();
+    const [emptyChooser] = await Promise.all([
+      page.waitForEvent('filechooser'), touch ? picker.tap() : picker.press('Enter')
+    ]);
+    await emptyChooser.setFiles([]);
     await sample.focus();
     await page.keyboard.press('Enter');
     await page.locator('#resultArea').waitFor();
@@ -49,6 +69,15 @@ async function check(browser, artifact, width, locale) {
     await page.locator('#reanalyzeButton').click();
     await page.locator('#resultArea').waitFor();
     assert.equal(await tabs.first().getAttribute('aria-selected'), 'true');
+    const [replacement] = await Promise.all([
+      page.waitForEvent('filechooser'), page.locator('#replaceButton').click()
+    ]);
+    await replacement.setFiles(path.resolve('assets/media-inspector-ja.mp4'));
+    await page.locator('#appConfirmOk').click();
+    await page.waitForFunction(() => document.querySelector('#fileName').textContent.endsWith('.mp4') &&
+      !document.querySelector('#resultArea').hidden);
+    assert.match(await page.locator('#overviewGrid').innerText(), /1280\s*×\s*720/);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);
     console.log('PASS', artifact, width, locale);
@@ -59,7 +88,7 @@ async function check(browser, artifact, width, locale) {
   const browser = await chromium.launch(process.env.PLAYWRIGHT_CHANNEL ? {channel:process.env.PLAYWRIGHT_CHANNEL} : {});
   try {
     for (const artifact of ['index.html', 'index.self-extract.html']) {
-      for (const [width, locale] of [[320, 'en-US'], [390, 'ja-JP'], [1280, 'ja-JP']]) {
+      for (const [width, locale] of [[320, 'en-US'], [390, 'ja-JP'], [980, 'ja-JP'], [1280, 'ja-JP']]) {
         await check(browser, artifact, width, locale);
       }
     }

@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Redesign file intake with an inspectable local WAV and waveform. Open results on format and quality, with separate tabs for tracks, privacy and details; mobile shortcuts open the corresponding report panel.
+- Simplify file intake to one picker, an optional local WAV sample and a short format reference. Open results on format and quality, with separate tabs for tracks, privacy and details. Mobile shortcuts open the corresponding report panel.
 
 - Count date tags among privacy candidates and show the categories confirmed removed after re-inspection.
 - Classify album covers separately in stream counts, playback checks and text reports. Mark playback checks inapplicable for files with no audio or moving video.
