@@ -6,6 +6,11 @@ Inspect common video/audio files locally and present technical media facts in a 
 
 ## Primary flow
 
+- Treat video streams marked `disposition.attachedPicture` as cover art in the UI and text export. Keep their original stream indices and JSON. Exclude cover images from playback selection, video FPS, the video count and the mobile Video shortcut.
+- When the report has no audio or moving video, skip both browser checks and show a neutral “not applicable” diagnosis.
+- At the smartphone breakpoint, put detected container, available duration and primary video or audio facts at the start of the diagnosis scroll target.
+- Count plain `date` tags, including WAV creation dates, among privacy candidates. Show localized category counts before cleaning and after verified removal, without exposing their values in the result message.
+
 1. User chooses or drops one media file.
 2. The app automatically starts the compact FFmpeg WASM Media Inspector runner.
 3. The browser `File` is mounted through WORKERFS; the app does not call `File.arrayBuffer()` for the whole inspection input.

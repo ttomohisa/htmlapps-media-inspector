@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Count date tags among privacy candidates and show the categories confirmed removed after re-inspection.
+- Classify album covers separately in stream counts, playback checks and text reports. Mark playback checks inapplicable for files with no audio or moving video.
+- Show a compact technical summary above Media Doctor on phones.
+
 - Verify the complete current header version at narrow phone widths; reserve space for the version beside truncated app titles.
 
 - 1.0.6: Replace the local-processing lock with a decorative shield, preserving the existing Japanese/English privacy text.

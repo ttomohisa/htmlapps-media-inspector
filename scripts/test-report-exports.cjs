@@ -508,6 +508,108 @@ test('Cancelling a pending file read settles immediately without using late byte
 function riffChunk(id,payload){const b=Buffer.alloc(8+payload.length+(payload.length&1));b.write(id);b.writeUInt32LE(payload.length,4);payload.copy(b,8);return b}
 function makeWav(){const fmt=Buffer.alloc(16);fmt.writeUInt16LE(1);fmt.writeUInt16LE(1,2);fmt.writeUInt32LE(8000,4);fmt.writeUInt32LE(16000,8);fmt.writeUInt16LE(2,12);fmt.writeUInt16LE(16,14);const audio=Buffer.from([0,1,2,3,4,5,6,7]),chunks=Buffer.concat([riffChunk('fmt ',fmt),riffChunk('LIST',Buffer.from('INFOprivate')),riffChunk('data',audio)]),head=Buffer.alloc(12);head.write('RIFF');head.writeUInt32LE(chunks.length+4,4);head.write('WAVE',8);return{bytes:Buffer.concat([head,chunks]),audio}}
 function isoBox(type,payload=Buffer.alloc(0)){const head=Buffer.alloc(8);head.writeUInt32BE(payload.length+8);head.write(type,4,4,'latin1');return Buffer.concat([head,payload])}
+
+test('Date candidates are named before cleaning and after verified removal', async () => {
+  const h = harness(), original = sample();
+  original.format = {name: 'wav', metadata: {DATE: '2024-03-14', update: 'unrelated'}};
+  h.inspectWith(original);
+  await h.app.analyzeFile(new File([makeWav().bytes], 'dated.wav', {type: 'audio/wav'}));
+  h.app.applyLanguage('ja');
+  assert.match(h.get('cleanerChips').innerHTML, /日付 1件/);
+  const verified = {...original, format: {name: 'wav', metadata: {}}};
+  h.inspectWith(verified);
+  exposeCleaning(h);
+  const cleaning = h.app.cleanMetadata();
+  await h.get('appConfirmOk').click();
+  await cleaning;
+  assert.equal(h.downloads.length, 1);
+  assert.match(h.get('cleanerResult').textContent, /削除を確認.*日付 1件/);
+  h.app.applyLanguage('en');
+  assert.match(h.get('cleanerResult').textContent, /Removed.*Date \(1\)/);
+  assert.doesNotMatch(h.get('cleanerResult').textContent, /2024-03-14|update/);
+});
+
+const coverStream = {index: 1, type: 'video', codec: {name: 'png'},
+  disposition: {attachedPicture: true}, video: {width: 64, height: 64, frameRate: {value: 90000}}};
+
+test('A date still present on re-inspection warns before downloading', async () => {
+  const h = harness(), report = sample();
+  report.format = {name: 'wav', metadata: {date:'2024-03-14'}};
+  h.inspectWith(report);
+  await h.app.analyzeFile(new File([makeWav().bytes], 'dated.wav'));
+  exposeCleaning(h);
+  const warning = deferred();
+  const dialog = h.get('appConfirmDialog');
+  const show = dialog.showModal.bind(dialog);
+  dialog.showModal = () => {
+    show();
+    if (h.get('appConfirmMessage').textContent.endsWith('\ndate')) warning.resolve();
+  };
+  const cleaning = h.app.cleanMetadata();
+  await h.get('appConfirmOk').click();
+  await Promise.race([warning.promise, cleaning]);
+  assert.equal(h.downloads.length, 0);
+  assert.equal(dialog.open, true);
+  await h.get('appConfirmCancel').click();
+  await cleaning;
+  assert.equal(h.downloads.length, 0);
+  assert.doesNotMatch(h.get('cleanerResult').textContent, /Removed from the inspected fields/);
+});
+
+test('Cover art is counted separately and omitted from video playback and FPS', async () => {
+  const report = sample();
+  report.format.name = 'mov,mp4';
+  report.format.streamCount = 2;
+  report.streams.push(coverStream);
+  const h = await inspected(report);
+  assert.equal(h.get('mobileVideo').disabled, true);
+  assert.match(h.get('overviewGrid').innerHTML, /Cover art 1/);
+  assert.match(h.get('otherList').innerHTML, /Cover art/);
+  assert.doesNotMatch(h.get('videoList').innerHTML, /90000|png/);
+  assert.match(h.app.state.mimeCandidate, /^audio\/mp4/);
+  const {text} = await downloadSummary(h);
+  assert.match(text, /Audio 1 · Cover art 1/);
+  assert.match(text, /#1 · Cover art\nCodec: png/);
+  assert.doesNotMatch(text, /Frame rate|90000/);
+  assert.equal(h.get('rawJson').textContent, JSON.stringify(report, null, 2));
+  report.streams.push({index: 2, type: 'video', codec: {name: 'h264'}, video: {frameRate: {value: 24}}});
+  const mixed = await inspected(report);
+  assert.equal(mixed.get('mobileVideo').disabled, false);
+  assert.match(mixed.get('videoList').innerHTML, /24 fps/);
+  assert.match(mixed.app.state.mimeCandidate, /^video\/mp4/);
+});
+
+test('Subtitle-only and cover-only reports show a neutral playback diagnosis', async () => {
+  for (const stream of [{type: 'subtitle'}, coverStream]) {
+    const h = harness();
+    h.context.result = JSON.stringify({format: {name: 'matroska,webm'}, streams: [stream]});
+    vm.runInContext('runInspector = async () => result', h.context);
+    // A cover-only regression may start an unnecessary media probe.
+    h.context.setTimeout = fn => {queueMicrotask(fn); return 1};
+    await h.app.analyzeFile(file('tracks.mkv'));
+    assert.equal(h.get('resultArea').hidden, false);
+    assert.equal(h.app.state.nativeResult.status, 'skipped');
+    assert.equal(h.get('doctorTitle').textContent, 'Playback check not applicable');
+    assert.doesNotMatch(h.get('doctorIssues').innerHTML, /device probe/);
+    assert.notEqual(h.get('doctorMark').textContent, '✓');
+  }
+});
+
+test('Mobile facts follow the current media and language', async () => {
+  const report = sample();
+  report.format.name = 'mp3';
+  report.format.duration = 2;
+  report.streams[0].audio.sampleRate = 44100;
+  report.streams.push(coverStream);
+  const h = await inspected(report);
+  h.app.applyLanguage('ja');
+  assert.equal(h.get('mobileFacts').textContent, 'MP3 · 0:02.000 · 44.1 kHz · ステレオ');
+  h.app.applyLanguage('en');
+  assert.match(h.get('mobileFacts').textContent, /44.1 kHz · Stereo/);
+  const replacement = {format: {name: 'wav'}, streams: [], chapters: []};
+  await replace(h, replacement);
+  assert.equal(h.get('mobileFacts').textContent, 'WAV');
+});
 test('Synthetic WAV cleaning preserves audio bytes, RIFF size and original bytes', async () => {
   const h=harness(),{bytes,audio}=makeWav();h.context.media=new File([bytes],'a.wav',{type:'audio/wav'});
   const result=await vm.runInContext('sanitizeWav(media)',h.context),out=Buffer.from(await result.blob.arrayBuffer());

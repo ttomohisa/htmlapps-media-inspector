@@ -76,6 +76,10 @@ Python, Node.js, and a local web server are not required for the normal Windows 
 
 ## Usage
 
+On phones, the format, duration and main video or audio specifications appear above Media Doctor. Album covers appear under **Subtitles & other** and in the technical summary as **Cover art**. Files containing only subtitles or attachments have no audio or video track to check for playback.
+
+The metadata cleaner groups candidate fields by category, including dates and locations. When re-inspection confirms all of those candidates are gone, the result names the categories and counts.
+
 1. Choose a video or audio file, or drop it onto the file area.
 2. Media Inspector mounts the browser `File` into the FFmpeg Worker through WORKERFS and starts inspection automatically.
 3. Check **Media Doctor** first if you are troubleshooting browser playback.
