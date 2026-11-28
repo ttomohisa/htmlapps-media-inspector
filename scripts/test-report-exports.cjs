@@ -42,7 +42,7 @@ function harness(){
  }
  const get=id=>{if(!nodes.has(id)){const node=new Element(id);const tag=source.match(new RegExp('<[^>]+id="'+id+'"[^>]*>'));node.disabled=Boolean(tag&&/\bdisabled(?:[\s=>])/.test(tag[0]));nodes.set(id,node)}return nodes.get(id)};
  const document={getElementById:get,querySelectorAll:()=>[],documentElement:new Element('html'),body:new Element('body'),activeElement:null,createElement:tag=>{const e=new Element();e.tag=tag;created.push(e);return e},execCommand:command=>{assert.equal(command,'copy');fallbackWrites.push(selected?.value);return fallback()}};
- const window={innerWidth:1000,matchMedia:()=>({matches:false}),events:{},addEventListener(type,fn){(this.events[type]||=[]).push(fn)},dispatch(type){for(const fn of this.events[type]||[])fn()}};
+ const window={innerWidth:1000,matchMedia:()=>({matches:false}),events:{},addEventListener(type,fn){(this.events[type]||=[]).push(fn)},dispatch(type,event={}){for(const fn of this.events[type]||[])fn(event)}};
  const context=vm.createContext({document,window,navigator:{language:'en',clipboard:{writeText:text=>{clipboardWrites.push(text);return clipboard(text)}}},Blob,File,HTMLElement:Element,TextEncoder,TextDecoder,Uint8Array,DOMException,URL:{createObjectURL:blob=>{const url='blob:synthetic/'+ ++next;urls.set(url,blob);return url},revokeObjectURL:url=>{revoked.push(url);urls.delete(url)}},requestAnimationFrame:f=>f(),setTimeout:()=>++next,clearTimeout(){},console});
  vm.runInContext(script,context,{filename:'exact-source-script.js'});
  vm.runInContext('globalThis.app={state,els,analyzeFile,acceptCandidate,cancelInspection,resetResult,copyJson,saveJson,reportFilename,formatDuration,formatBytes,renderReport,renderStreams,applyLanguage,streamsOf};',context);
@@ -620,6 +620,27 @@ test('Mobile facts follow the current media and language', async () => {
   const replacement = {format: {name: 'wav'}, streams: [], chapters: []};
   await replace(h, replacement);
   assert.equal(h.get('mobileFacts').textContent, 'WAV');
+});
+
+test('A failed replacement cannot show facts from the previous file', async () => {
+  const h = await inspected();
+  assert.match(h.get('mobileFacts').textContent, /48 kHz/);
+  const replacement = h.app.acceptCandidate({name:'empty.mov', type:'video/quicktime', size:0});
+  await h.get('appConfirmOk').click();
+  await replacement;
+  assert.equal(h.get('fileName').textContent, 'empty.mov');
+  assert.equal(h.get('mobileFacts').textContent, '');
+  assert.equal(h.get('fileError').hidden, false);
+});
+
+test('Returning from the back/forward cache restores exports for the completed report', async () => {
+  const h = await inspected();
+  h.context.window.dispatch('pagehide', {persisted:true});
+  assert.equal(h.get('saveSummaryButton').disabled, true);
+  h.context.window.dispatch('pageshow', {persisted:true});
+  assert.equal(h.get('saveSummaryButton').disabled, false);
+  await h.get('saveSummaryButton').click();
+  assert.equal(h.downloads.length, 1);
 });
 test('Synthetic WAV cleaning preserves audio bytes, RIFF size and original bytes', async () => {
   const h=harness(),{bytes,audio}=makeWav();h.context.media=new File([bytes],'a.wav',{type:'audio/wav'});

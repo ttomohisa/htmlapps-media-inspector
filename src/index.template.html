@@ -51,8 +51,8 @@
     .choose-file svg {width:1.25em;height:1.25em}
     .drop-zone:hover .choose-file {background:var(--accent-hover)}
     .drop-hint {color:var(--muted);font-size:.9375em}
-    .picker-notes {display:grid;justify-items:start;gap:.125em}
-    .privacy-chip {display:inline-flex;align-items:center;gap:.35em;color:var(--muted);font-size:.8125em}
+    body:not(:has(.file-panel.is-visible)) .main {padding-block-start:4px}
+    .privacy-chip {display:flex;align-items:center;gap:.35em;width:fit-content;margin:0 0 4px auto;color:var(--accent);font-size:.8125em;font-weight:500}
     .privacy-chip svg {width:1.1em;height:1.1em;flex:none}
     #inspectSample {display:inline-flex;align-items:center;min-height:2.9em;padding:.35em 0;
       border:0;background:none;color:var(--accent);font-size:.9375em;text-decoration:underline;text-underline-offset:.22em}
@@ -104,7 +104,7 @@
     .extra-metrics {padding:0 12px;border-radius:8px;background:var(--surface-muted)}
     .overview-item {min-width:0;padding:14px 8px 14px 0;border:0;border-radius:0;background:none;overflow-wrap:anywhere}
     .overview-item:nth-child(n+4) {border-top:1px solid var(--line)}
-    .overview-item strong {font-size:20px;letter-spacing:-.02em;line-height:1.3;font-variant-numeric:tabular-nums}
+    .overview-item strong {font-size:20px;letter-spacing:-.02em;line-height:1.3;font-variant-numeric:tabular-nums;white-space:normal}
     .overview-item>span,.kv>span {color:var(--muted);font-size:12px}
     .overview-item .subvalue {font-size:12px}
     .summary-actions {margin-top:16px}
@@ -181,7 +181,7 @@
   <circle cx="42" cy="41" r="8" fill="none" stroke="white" stroke-width="4"/>
   <path d="M48 47l7 7" stroke="white" stroke-width="4" stroke-linecap="round"/>
 </svg></div>
-      <div class="brand-copy"><h1>Media Inspector <span class="version-badge">v1.0.6</span></h1><p data-i18n="brandSub">動画・音声の中身を端末内で確認</p></div>
+      <div class="brand-copy"><h1>Media Inspector <span class="version-badge">v1.1.0</span></h1><p data-i18n="brandSub">動画・音声の中身を端末内で確認</p></div>
     </div>
     <div class="header-actions">
       <button class="header-btn" id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え">EN</button>
@@ -193,16 +193,14 @@
   <div class="workspace">
     <section id="fileSection" class="source-section">
       <div id="intake">
+        <span class="privacy-chip" id="localNotice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span data-i18n="localOnly">完全ローカル処理</span></span>
         <label class="drop-zone" id="dropZone">
           <span class="choose-file">
             <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#folder-open"/></svg>
             <span id="chooseFileLabel" data-i18n="chooseFile">ファイルを開く</span>
           </span>
           <input id="fileInput" type="file" aria-labelledby="chooseFileLabel" aria-describedby="localNotice">
-          <span class="picker-notes">
-            <span class="drop-hint" aria-hidden="true" data-i18n="dropSub">または、ここにファイルをドロップ</span>
-            <span class="privacy-chip" id="localNotice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span data-i18n="localOnly">完全ローカル処理</span></span>
-          </span>
+          <span class="drop-hint" aria-hidden="true" data-i18n="dropSub">または、ここにファイルをドロップ</span>
         </label>
         <div class="format-guide">
           <section class="guide-row" aria-labelledby="inspectGuide">
@@ -400,27 +398,68 @@ function selectReportView(view) {
     tab.tabIndex = selected ? 0 : -1;
     $(tab.getAttribute('aria-controls')).hidden = !selected;
   }
+  mobileNav.clearHidden();
 }
 function mountReportTabs() {
+  function activate(tab) {
+    selectReportView(tab.dataset.reportView);
+    const panel = $(tab.getAttribute('aria-controls'));
+    const offset = panel.getBoundingClientRect().top - tab.parentElement.getBoundingClientRect().bottom;
+    if (offset < -1) window.scrollBy({top:offset, behavior:'instant'});
+  }
   reportTabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => selectReportView(tab.dataset.reportView));
+    tab.addEventListener('click', () => activate(tab));
     tab.addEventListener('keydown', event => {
       const next = {ArrowLeft:(index + reportTabs.length - 1) % reportTabs.length,
         ArrowRight:(index + 1) % reportTabs.length, Home:0, End:reportTabs.length - 1}[event.key];
       if (next === undefined) return;
       event.preventDefault();
-      selectReportView(reportTabs[next].dataset.reportView);
-      reportTabs[next].focus();
+      activate(reportTabs[next]);
+      reportTabs[next].focus({preventScroll:true});
     });
   });
 }
 mountReportTabs();
 mountSample();
-function mountMobileNav(){const buttons=[...els.mobileNav.querySelectorAll('.app-mobile-bottom-item[data-mobile-target]')],reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;const setActive=key=>buttons.forEach(b=>{const active=b.dataset.mobileKey===key;b.classList.toggle('is-active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});els.mobileNav.addEventListener('click',e=>{const b=e.target.closest('.app-mobile-bottom-item');if(!b||b.disabled)return;const target=$(b.dataset.mobileTarget);if(target){if(b.dataset.mobileKey!=='file')selectReportView(b.dataset.mobileKey==='doctor'?'overview':'tracks');target.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});setActive(b.dataset.mobileKey)}});if('IntersectionObserver'in window){const items=buttons.map(b=>({b,target:$(b.dataset.mobileTarget)})).filter(x=>x.target);const obs=new IntersectionObserver(entries=>{const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(!visible)return;const x=items.find(i=>i.target===visible.target);if(x&&!x.b.disabled)setActive(x.b.dataset.mobileKey)},{rootMargin:'-30% 0px -55% 0px',threshold:[0,.01,.25,.5]});items.forEach(x=>obs.observe(x.target))}return{setActive}}
+function mountMobileNav() {
+  const buttons = [...els.mobileNav.querySelectorAll('.app-mobile-bottom-item[data-mobile-target]')];
+  const items = buttons.map(button => ({button, target:$(button.dataset.mobileTarget)})).filter(item => item.target);
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+  function setActive(key) {
+    for (const button of buttons) {
+      const active = button.dataset.mobileKey === key;
+      button.classList.toggle('is-active', active);
+      if (active) button.setAttribute('aria-current', 'page');
+      else button.removeAttribute('aria-current');
+    }
+  }
+  function clearHidden() {
+    const current = items.find(({button}) => button.getAttribute('aria-current') === 'page');
+    if (current?.target.closest('[hidden]')) setActive(null);
+  }
+  els.mobileNav.addEventListener('click', event => {
+    const item = items.find(({button}) => button === event.target.closest('.app-mobile-bottom-item'));
+    if (!item || item.button.disabled) return;
+    const key = item.button.dataset.mobileKey;
+    if (key !== 'file') selectReportView(key === 'doctor' ? 'overview' : 'tracks');
+    item.target.scrollIntoView({behavior:reduce ? 'auto' : 'smooth', block:'start'});
+    setActive(key);
+  });
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(entries => {
+      const visible = entries.filter(entry => entry.isIntersecting && !entry.target.closest('[hidden]'))
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      const item = items.find(({target}) => target === visible?.target);
+      if (item && !item.button.disabled) setActive(item.button.dataset.mobileKey);
+    }, {rootMargin:'-30% 0px -55% 0px', threshold:[0, .01, .25, .5]});
+    items.forEach(({target}) => observer.observe(target));
+  }
+  return {setActive, clearHidden};
+}
 const mobileNav=mountMobileNav();
 function releaseFileUrl(){state.nativeCancel?.();if(state.fileUrl){URL.revokeObjectURL(state.fileUrl);state.fileUrl=null}for(const media of[els.videoProbe,els.audioProbe]){try{media.pause()}catch{}media.removeAttribute('src');media.load()}}
 function terminateWorker(){state.workerGeneration++;const cancel=state.workerCancel;if(cancel){cancel();return}if(state.worker){state.worker.terminate();state.worker=null}if(state.workerUrl){URL.revokeObjectURL(state.workerUrl);state.workerUrl=null}}
-function resetResult(){state.report=null;state.reportText='';state.summaryGeneration=null;els.saveSummaryButton.disabled=true;state.nativeResult=null;state.canPlayResult=null;state.mimeCandidate=null;state.cleanResult=null;els.resultArea.hidden=true;els.overviewGrid.innerHTML='';selectReportView('overview');els.mobileDoctor.disabled=true;els.mobileVideo.disabled=true;els.mobileAudio.disabled=true;els.mobileClean.disabled=true;mobileNav.setActive('file');els.videoList.innerHTML='';els.audioList.innerHTML='';els.otherList.innerHTML='';els.rawJson.textContent=''}
+function resetResult(){state.report=null;state.reportText='';state.summaryGeneration=null;els.saveSummaryButton.disabled=true;state.nativeResult=null;state.canPlayResult=null;state.mimeCandidate=null;state.cleanResult=null;els.resultArea.hidden=true;els.mobileFacts.textContent='';els.overviewGrid.innerHTML='';selectReportView('overview');els.mobileDoctor.disabled=true;els.mobileVideo.disabled=true;els.mobileAudio.disabled=true;els.mobileClean.disabled=true;mobileNav.setActive('file');els.videoList.innerHTML='';els.audioList.innerHTML='';els.otherList.innerHTML='';els.rawJson.textContent=''}
 function cancelInspection(silent=false){if(!state.processing)return;state.inspectionGeneration++;terminateWorker();releaseFileUrl();state.processing=false;resetResult();els.progressCard.classList.remove('is-visible');if(!silent)showToast(t('cancelled'))}
 function base64Bytes(value){const raw=atob(value),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out}
 async function gunzipBytes(bytes){if(typeof DecompressionStream!=='function')throw new Error('This browser does not support DecompressionStream.');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return new Uint8Array(await new Response(stream).arrayBuffer())}
@@ -856,7 +895,30 @@ async function copyJson(){
   if(isCurrent())showToast(t(copied?'copied':'copyFailed'),copied?'ok':'error');
 }
 function saveJson(){if(!state.reportText)return;const blob=new Blob([state.reportText+'\n'],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=reportFilename();a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast(t('saved'))}
-els.languageButton.addEventListener('click',()=>applyLanguage(state.language==='ja'?'en':'ja'));els.helpButton.addEventListener('click',()=>els.helpDialog.showModal());els.helpClose.addEventListener('click',()=>els.helpDialog.close());els.helpDialog.addEventListener('cancel',e=>{e.preventDefault();els.helpDialog.close()});els.helpDialog.addEventListener('click',e=>{if(e.target!==els.helpDialog)return;const r=els.helpDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)els.helpDialog.close()});els.fileInput.addEventListener('change',()=>{const file=els.fileInput.files?.[0];if(file)acceptCandidate(file);});els.replaceButton.addEventListener('click',chooseReplacement);els.reanalyzeButton.addEventListener('click',()=>{if(state.file&&!state.processing&&!state.cleaning)analyzeFile(state.file)});els.cleanMetadataButton.addEventListener('click',cleanMetadata);els.cancelCleanButton.addEventListener('click',()=>cancelCleaning());els.mobileClean.addEventListener('click',()=>{selectReportView('privacy');$('cleanerSection').scrollIntoView({block:'start'});cleanMetadata()});els.cleanFilenameInput.addEventListener('blur',()=>{const kind=cleanerKind(state.file,state.report);if(kind)els.cleanFilenameInput.value=normalizedCleanFilenameBase(state.file,kind)});els.cancelButton.addEventListener('click',()=>cancelInspection(false));els.copyJsonButton.addEventListener('click',copyJson);els.saveJsonButton.addEventListener('click',saveJson);els.saveSummaryButton.addEventListener('click',saveSummary);for(const type of['dragenter','dragover'])els.dropZone.addEventListener(type,e=>{e.preventDefault();els.dropZone.classList.add('is-dragging')});for(const type of['dragleave','drop'])els.dropZone.addEventListener(type,e=>{e.preventDefault();els.dropZone.classList.remove('is-dragging')});els.dropZone.addEventListener('drop',e=>{const file=e.dataTransfer?.files?.[0];if(file)acceptCandidate(file)});window.addEventListener('pagehide',()=>{state.inspectionGeneration++;cancelCleaning(true);AppConfirm.cancel();els.saveSummaryButton.disabled=true;terminateWorker();releaseFileUrl()});applyLanguage(defaultLanguage());
+els.languageButton.addEventListener('click',()=>applyLanguage(state.language==='ja'?'en':'ja'));els.helpButton.addEventListener('click',()=>els.helpDialog.showModal());els.helpClose.addEventListener('click',()=>els.helpDialog.close());els.helpDialog.addEventListener('cancel',e=>{e.preventDefault();els.helpDialog.close()});els.helpDialog.addEventListener('click',e=>{if(e.target!==els.helpDialog)return;const r=els.helpDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)els.helpDialog.close()});els.fileInput.addEventListener('change',()=>{const file=els.fileInput.files?.[0];if(file)acceptCandidate(file);});els.replaceButton.addEventListener('click',chooseReplacement);els.reanalyzeButton.addEventListener('click',()=>{if(state.file&&!state.processing&&!state.cleaning)analyzeFile(state.file)});els.cleanMetadataButton.addEventListener('click',cleanMetadata);els.cancelCleanButton.addEventListener('click',()=>cancelCleaning());els.mobileClean.addEventListener('click',()=>{selectReportView('privacy');$('cleanerSection').scrollIntoView({block:'start'});cleanMetadata()});els.cleanFilenameInput.addEventListener('blur',()=>{const kind=cleanerKind(state.file,state.report);if(kind)els.cleanFilenameInput.value=normalizedCleanFilenameBase(state.file,kind)});els.cancelButton.addEventListener('click',()=>cancelInspection(false));els.copyJsonButton.addEventListener('click',copyJson);els.saveJsonButton.addEventListener('click',saveJson);els.saveSummaryButton.addEventListener('click',saveSummary);for(const type of['dragenter','dragover'])els.dropZone.addEventListener(type,e=>{e.preventDefault();els.dropZone.classList.add('is-dragging')});for(const type of['dragleave','drop'])els.dropZone.addEventListener(type,e=>{e.preventDefault();els.dropZone.classList.remove('is-dragging')});els.dropZone.addEventListener('drop',e=>{const file=e.dataTransfer?.files?.[0];if(file)acceptCandidate(file)});
+let cachedReport = null;
+window.addEventListener('pagehide', event => {
+  cachedReport = event?.persisted && canSaveSummary() ? state.report : null;
+  if (state.processing) {
+    cancelInspection(true);
+  } else {
+    state.inspectionGeneration++;
+    terminateWorker();
+    releaseFileUrl();
+  }
+  cancelCleaning(true);
+  AppConfirm.cancel();
+  els.saveSummaryButton.disabled = true;
+});
+window.addEventListener('pageshow', event => {
+  if (event.persisted && cachedReport && cachedReport === state.report) {
+    state.summaryGeneration = state.inspectionGeneration;
+    els.saveSummaryButton.disabled = false;
+    renderCleaner();
+  }
+  cachedReport = null;
+});
+applyLanguage(defaultLanguage());
 </script>
 </body>
 </html>

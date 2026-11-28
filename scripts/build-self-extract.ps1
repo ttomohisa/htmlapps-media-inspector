@@ -4,7 +4,8 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$OutputPath,
   [string]$AppName = "Standalone app",
-  [string]$AppNameJa = "Standalone app"
+  [string]$AppNameJa = "Standalone app",
+  [string]$GeneratedAtUtc = [DateTime]::UtcNow.ToString("o")
 )
 
 $ErrorActionPreference = "Stop"
@@ -227,7 +228,7 @@ New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
 $manifestPath = Join-Path $outputDirectory "self-extract-manifest.json"
 $manifest = [ordered]@{
   schemaVersion = 1
-  generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+  generatedAtUtc = $GeneratedAtUtc
   source = [ordered]@{
     path = [System.IO.Path]::GetFileName($InputPath)
     bytes = $sourceBytes

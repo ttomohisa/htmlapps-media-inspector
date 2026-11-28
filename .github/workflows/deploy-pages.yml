@@ -27,7 +27,9 @@ jobs:
 
       - name: Build and verify standalone HTML
         shell: pwsh
-        run: ./scripts/check-repository.ps1
+        run: |
+          $env:SOURCE_DATE_EPOCH = git show -s --format=%ct HEAD
+          ./scripts/check-repository.ps1
 
       - name: Check whether GitHub Pages is enabled
         id: pages-status

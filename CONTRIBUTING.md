@@ -19,6 +19,16 @@
 
 ## Pull requests
 
+### Releasing
+
+1. Increase the stable `major.minor.patch` version in `app.config.json`. Update the initial version badge in `src/index.template.html`, the current version in `APP_SPEC.md` and the matching `## X.Y.Z` entry in `CHANGELOG.md`.
+2. Review the **Validate standalone HTML** check on the PR. For a version increase it builds and tests both HTML files and uploads the four intended downloads in the `release-downloads` Actions artifact.
+3. Merge into `main`. Once the same checks pass on the merged commit, the workflow stages a draft, verifies the uploaded bytes, tags that commit and publishes the release. Merges with an unchanged version do not issue another release.
+
+If publication is interrupted, re-run the failed jobs in the original **Validate standalone HTML** run for the merge. An existing draft for the same tag and commit can resume. A conflicting tag or a different published asset stops publication. Pages deployment runs independently.
+
+### PR description
+
 Describe:
 
 - User-visible behavior changed.

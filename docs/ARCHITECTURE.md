@@ -45,7 +45,7 @@ The FFmpeg runner reports media facts. Browser compatibility guidance is intenti
 
 ## Reusable UI
 
-`components/confirm-dialog.html` documents the confirmation-dialog pattern used before replacing an existing report. `components/mobile-bottom-bar.html` documents the safe-area-aware mobile navigation pattern used by the five-item File / Doctor / Video / Audio / Details bar.
+`components/confirm-dialog.html` documents the confirmation-dialog pattern used before replacing an existing report. `components/mobile-bottom-bar.html` documents the safe-area-aware mobile navigation pattern used by the five-item File / Doctor / Video / Audio / Clean & save bar.
 
 ## Outputs
 

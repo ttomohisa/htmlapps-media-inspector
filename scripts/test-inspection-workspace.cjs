@@ -42,16 +42,18 @@ async function check(browser, artifact, width, locale) {
     const sample = page.locator('#inspectSample');
     await sample.waitFor({timeout:3000});
     await assertPageAlignment(page);
-    assert.equal(await page.locator('#intake > :first-child').getAttribute('id'), 'dropZone');
+    assert.equal(await page.locator('#intake > :first-child').getAttribute('id'), 'localNotice');
     const cleanupHeading = page.locator('#formatGuide');
     assert.equal(await cleanupHeading.innerText(), locale.startsWith('ja') ? 'メタデータの削除' : 'Remove metadata');
     assert.ok(await page.locator('[data-i18n="cleanCopyNote"]').isVisible());
     assert.equal(await page.locator('#mobileNav').isVisible(), false);
     const picker = page.locator('#fileInput');
     assert.equal(await picker.getAttribute('aria-describedby'), 'localNotice');
-    assert.ok(await page.locator('#dropZone #localNotice').isVisible());
+    const noticeBox = await page.locator('#intake > #localNotice').boundingBox();
     assert.match(await page.locator('[data-i18n="inspectFields"]').innerText(), locale.startsWith('ja') ? /コーデック/ : /codec/);
-    const pickerBox = await picker.boundingBox();
+    const pickerBox = await page.locator('#dropZone').boundingBox();
+    assert.ok(noticeBox && noticeBox.y + noticeBox.height <= pickerBox.y + 1);
+    assert.ok(Math.abs(noticeBox.x + noticeBox.width - pickerBox.x - pickerBox.width) < 1);
     const buttonBox = await page.locator('.choose-file').boundingBox();
     const sampleBox = await sample.boundingBox();
     assert.ok(sampleBox.y >= pickerBox.y + pickerBox.height - 1, 'sample follows the picker');
@@ -94,6 +96,8 @@ async function check(browser, artifact, width, locale) {
       assert.equal(await page.locator('#audioSection').isVisible(), true);
       await page.locator('#mobileDoctor').click();
       assert.equal(await page.locator('#doctorSection').isVisible(), true);
+      await tabs.last().click();
+      assert.equal(await page.locator('#mobileDoctor').getAttribute('aria-current'), null);
       await page.locator('#mobileClean').click();
       assert.equal(await page.locator('#appConfirmDialog').isVisible(), true);
       await page.keyboard.press('Escape');
@@ -112,6 +116,16 @@ async function check(browser, artifact, width, locale) {
     await page.waitForFunction(() => document.querySelector('#fileName').textContent.endsWith('.mp4') &&
       !document.querySelector('#resultArea').hidden);
     assert.match(await page.locator('#overviewGrid').innerText(), /1280\s*×\s*720/);
+    if (width === 320) {
+      const container = page.locator('.quick-metrics strong').first();
+      assert.ok(await container.evaluate(el => el.scrollWidth <= el.clientWidth + 1));
+      await tabs.nth(1).click();
+      await page.evaluate(() => window.scrollBy({top:450, behavior:'instant'}));
+      await tabs.first().click();
+      const panel = await page.locator('#panel-overview').boundingBox();
+      const nav = await page.getByRole('tablist').boundingBox();
+      assert.ok(panel.y >= nav.y + nav.height - 1, 'the beginning of Overview is visible');
+    }
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, []);

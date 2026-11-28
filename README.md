@@ -57,7 +57,11 @@ GitHub Pages delivers the initial HTML. After it loads, the selected media file 
 
 Just [open the demo](https://ttomohisa.github.io/htmlapps-media-inspector/). No installation or account is required.
 
-### Use it fully offline (advanced)
+### Download for offline use
+
+Download either HTML file from the [latest GitHub Release](https://github.com/ttomohisa/htmlapps-media-inspector/releases/latest) and open it in a browser. The ZIP includes both HTML files, the documentation and build manifests. `SHA256SUMS.txt` lists the checksums for the two HTML files and the ZIP.
+
+### Build from source on Windows
 
 1. Download or clone this repository.
 2. Run `build-standalone.bat` on Windows.
@@ -90,7 +94,7 @@ Copy JSON uses the report selected when you click it. If the report changes whil
 
 | Section | Typical information |
 | --- | --- |
-| **Basic information** | Container, file size, duration, total bitrate, start time, stream count, chapter count, probe score |
+| **Overview** | Container, file size, duration, total bitrate, start time, stream and chapter counts. The full JSON in Details includes the probe score when reported. |
 | **Video** | Codec, FourCC, profile, level, bitrate, dimensions, FPS, pixel format, SAR, field order, rotation, color/HDR information |
 | **Audio** | Codec, profile, bitrate, sample rate, channels, channel layout, sample format, duration |
 | **Subtitles & other** | Subtitle, data, attachment, and other stream types plus stream metadata |
@@ -163,6 +167,8 @@ The repository includes a workflow that builds the fully embedded HTML and deplo
 If Pages is not enabled yet, the workflow still builds and verifies the standalone artifacts and skips only the deployment step. Enable GitHub Actions as the Pages source, then re-run the workflow.
 
 Each push to `main` rebuilds the standalone HTML from the pinned FFmpeg release assets, runs the repository checks, uploads the build artifacts, and publishes `dist/` only after those checks pass.
+
+When a merge increases the version in `app.config.json`, GitHub Actions also verifies and packages the merged commit, creates its `vX.Y.Z` tag and publishes the four release downloads. Pull requests run the checks and prepare the downloads for review. [Release procedure](CONTRIBUTING.md#releasing)
 
 ## Development and build layout
 

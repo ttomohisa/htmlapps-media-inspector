@@ -56,7 +56,11 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 
 [デモを開く](https://ttomohisa.github.io/htmlapps-media-inspector/)だけで利用できます。インストールやアカウント登録は不要です。
 
-### 完全オフラインで使う（上級者向け）
+### オフラインで使う
+
+[最新のGitHub Release](https://github.com/ttomohisa/htmlapps-media-inspector/releases/latest) から通常版または自己展開版のHTMLをダウンロードし、ブラウザーで開きます。ZIPには両方のHTML・説明書・ビルド記録を収録しています。両HTMLとZIPのチェックサムは `SHA256SUMS.txt` で確認できます。
+
+### Windowsでソースからビルドする
 
 1. このリポジトリをダウンロードまたはクローンします。
 2. Windowsで `build-standalone.bat` を実行します。
@@ -93,7 +97,7 @@ JSONのコピーには、クリック時点の解析結果を使います。コ�
 
 | セクション | 主な内容 |
 | --- | --- |
-| **基本情報** | コンテナ、ファイルサイズ、時間、総bitrate、開始時刻、stream数、chapter数、probe score |
+| **概要** | コンテナ、サイズ、長さ、総ビットレート、開始時刻、ストリーム数、チャプター数。検出時のプローブスコアは「詳細・出力」のJSONで確認できます。 |
 | **Video** | Codec、FourCC、profile、level、bitrate、解像度、FPS、pixel format、SAR、走査方式、rotation、色 / HDR情報 |
 | **Audio** | Codec、profile、bitrate、sample rate、channels、channel layout、sample format、duration |
 | **字幕・その他** | Subtitle、data、attachmentなどのstream情報とmetadata |
@@ -166,6 +170,8 @@ Media Inspectorはフル版のFFmpegコマンドラインをそのままWASM化�
 Pagesがまだ有効化されていない場合、workflowはstandalone HTMLのビルドと検証を行ったうえで、デプロイだけをスキップします。SettingsでGitHub ActionsをPagesのSourceに設定した後、workflowを再実行してください。
 
 `main` へのpush時には、固定されたFFmpeg Release assetからstandalone HTMLを再生成し、repository checkを通したあと、build artifactを保存して `dist/` をPagesへ公開します。
+
+`app.config.json` の版を上げたPRをマージすると、GitHub Actionsがマージ後のコミットを検証し、そのコミットに `vX.Y.Z` タグを作成して4点の配布ファイルをGitHub Releaseで公開します。PRの段階では検証と配布ファイルの準備まで行います。[リリース手順](CONTRIBUTING.md#releasing)
 
 ## 開発とビルド
 
