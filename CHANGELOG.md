@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Simplify file intake to one picker, an optional local WAV sample and a short format reference. Open results on format and quality, with separate tabs for tracks, privacy and details. Mobile shortcuts open the corresponding report panel.
+- Restore the original warm gray page background and translucent header, including the desktop subtitle and version badge.
 
 - Count date tags among privacy candidates and show the categories confirmed removed after re-inspection.
 - Classify album covers separately in stream counts, playback checks and text reports. Mark playback checks inapplicable for files with no audio or moving video.
