@@ -48,6 +48,9 @@ async function check(browser, artifact, width, locale) {
     assert.ok(await page.locator('[data-i18n="cleanCopyNote"]').isVisible());
     assert.equal(await page.locator('#mobileNav').isVisible(), false);
     const picker = page.locator('#fileInput');
+    assert.equal(await picker.getAttribute('aria-describedby'), 'localNotice');
+    assert.ok(await page.locator('#dropZone #localNotice').isVisible());
+    assert.match(await page.locator('[data-i18n="inspectFields"]').innerText(), locale.startsWith('ja') ? /コーデック/ : /codec/);
     const pickerBox = await picker.boundingBox();
     const buttonBox = await page.locator('.choose-file').boundingBox();
     const sampleBox = await sample.boundingBox();

@@ -4,6 +4,7 @@
 
 - Simplify file intake to one picker, an optional local WAV sample and a list of formats that support saving a copy with metadata removed. Align the header, workspace and footer throughout the flow. Open results on format and quality, with separate tabs for tracks, privacy and details. Mobile shortcuts open the corresponding report panel.
 - Restore the original warm gray page background and translucent header, including the desktop subtitle and version badge.
+- Place the local-processing note beside the file picker on desktop and below the button on phones. List the fields available for inspection and reuse the open-folder icon when switching files.
 
 - Count date tags among privacy candidates and show the categories confirmed removed after re-inspection.
 - Classify album covers separately in stream counts, playback checks and text reports. Mark playback checks inapplicable for files with no audio or moving video.

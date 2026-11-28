@@ -13,7 +13,7 @@
     :root{color-scheme:light;--bg:#f5f5f2;--surface:#fff;--surface-muted:#f0f0ed;--surface-hover:#e9e9e5;--text:#20211f;--muted:#686b66;--line:#dadbd6;--line-strong:#bfc1ba;--accent:#16624f;--accent-hover:#0e503f;--accent-soft:#e1f0ea;--danger:#b3261e;--danger-soft:#fbe9e7;--warning:#8a5d00;--warning-soft:#fff4d3;--info:#285f91;--info-soft:#e8f1fa;--success:#087443;--success-soft:#e4f3eb;--focus:#4d8bc7;--shadow-sm:0 1px 2px rgba(25,28,24,.08),0 1px 6px rgba(25,28,24,.04);--shadow-md:0 14px 38px rgba(25,28,24,.13);--radius:12px;--radius-lg:18px;--header-height:66px;--mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
     *{box-sizing:border-box}html{scroll-behavior:smooth;background:var(--bg)}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}button,input{font:inherit}button{color:inherit;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.46}[hidden]{display:none!important}button:focus-visible,input:focus-visible,summary:focus-visible,[tabindex]:focus-visible{outline:3px solid color-mix(in srgb,var(--focus) 55%,transparent);outline-offset:2px}
     .app-header{position:sticky;z-index:30;top:0;min-height:var(--header-height);border-bottom:1px solid color-mix(in srgb,var(--line) 82%,transparent);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(16px) saturate(1.2)}.header-inner{min-height:var(--header-height);padding-block:10px;display:flex;align-items:center;gap:14px}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-mark{display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:25%;background:transparent;color:#fff;box-shadow:var(--shadow-sm)}.brand-mark svg{width:100%;height:100%}.brand-copy{min-width:0}.brand h1{margin:0;font-size:17px;line-height:1.2;letter-spacing:.01em}.version-badge{display:inline-flex;align-items:center;margin-left:7px;padding:1px 6px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface-muted);font-size:11px;font-weight:650;vertical-align:2px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px;white-space:nowrap}.header-actions{margin-left:auto;display:flex;align-items:center;gap:12px}.header-btn{min-height:36px;padding:0 3px;border:0;background:transparent;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12px;font-weight:750}.header-btn:hover{color:var(--accent)}.header-btn svg{width:20px;height:20px}
-    .main{padding-block:22px 58px}.privacy-chip{flex:none;display:inline-flex;align-items:center;gap:7px;margin-top:3px;padding:7px 0;border:0;border-radius:0;background:transparent;color:var(--accent);font-size:12px;font-weight:500;white-space:nowrap}.privacy-chip svg{width:15px;height:15px;color:var(--accent)}
+    .main{padding-block:22px 58px}
     .workspace{width:min(980px,100%);margin:0 auto;display:grid;gap:14px}.card{border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--surface);box-shadow:var(--shadow-sm);overflow:hidden;scroll-margin-top:calc(var(--header-height) + 14px)}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:20px 22px 0}.card-title-row{display:flex;align-items:flex-start;gap:10px}.section-icon{display:grid;place-items:center;width:30px;height:30px;flex:none;border-radius:9px;background:var(--accent-soft);color:var(--accent)}.section-icon svg{width:17px;height:17px}.card h2,.card h3{margin:2px 0 0;font-size:18px;letter-spacing:-.01em}.card-sub{margin:4px 0 0;color:var(--muted);font-size:12px}.card-body{padding:18px 22px 22px}
     .file-panel{display:none;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}.file-panel.is-visible{display:grid}.file-main{min-width:0}.file-name{font-size:16px;font-weight:820;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file-meta{display:flex;flex-wrap:wrap;gap:7px 14px;margin-top:7px;color:var(--muted);font-size:12px}.file-meta strong{color:var(--text)}.file-actions{display:flex;align-items:center;gap:12px}.text-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 1px;border:0;background:transparent;color:var(--accent);font-weight:750;white-space:nowrap}.text-btn:hover{text-decoration:underline}.text-btn svg{width:15px;height:15px}.text-btn.secondary{color:var(--muted)}
     .progress-card{display:none}.progress-card.is-visible{display:block}.progress-layout{display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:14px;align-items:center}.spinner{width:42px;height:42px;border:4px solid var(--accent-soft);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.progress-title{font-weight:820}.progress-detail{margin-top:3px;color:var(--muted);font-size:11px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.btn{min-height:42px;padding:8px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface);font-weight:750}.btn:hover{border-color:var(--line-strong);background:var(--surface-hover)}.btn.primary{border-color:var(--accent);background:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent-hover)}.btn.ghost{border:0;background:transparent}.btn.small{min-height:38px;padding:7px 11px;font-size:12px}.btn svg{width:17px;height:17px;vertical-align:-3px;margin-right:5px}
@@ -29,7 +29,7 @@
     .media-probe{position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:.001;pointer-events:none}
     .mobile-nav{display:none}
     footer{padding-bottom:28px;color:var(--muted);text-align:left;font-size:12px}
-    @media(max-width:760px){.overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kv:nth-child(n){border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.kv:nth-child(2n){border-right:0}.kv:nth-last-child(-n+2){border-bottom:0}.privacy-chip{display:none}}
+    @media(max-width:760px){.overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kv-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kv:nth-child(n){border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.kv:nth-child(2n){border-right:0}.kv:nth-last-child(-n+2){border-bottom:0}}
     @media(max-width:600px){:root{--header-height:58px}body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}.app-header{min-height:58px}.header-inner{min-height:58px;padding-block:8px}.brand-mark{width:34px;height:34px;border-radius:25%}.brand h1{font-size:15px}.brand p{display:none}.header-actions{gap:10px}.mobile-facts:not(:empty){display:block;margin:0;padding:11px 15px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700;line-height:1.5;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.workspace{gap:10px}.card{border-radius:15px;scroll-margin-top:70px}.card-head{padding:15px 15px 0}.card h2,.card h3{font-size:16px}.card-body{padding:13px 15px 15px}.file-panel{grid-template-columns:1fr}.file-actions{justify-content:flex-start}.progress-layout{grid-template-columns:38px 1fr}.progress-layout .btn{grid-column:1/-1}.spinner{width:36px;height:36px}.doctor-main{grid-template-columns:38px 1fr;padding:13px}.doctor-mark{width:38px;height:38px}.cleaner-panel{grid-template-columns:1fr;gap:13px;padding:13px}.cleaner-main{padding:0 1px}.cleaner-main h3{font-size:17px}.cleaner-main p{font-size:12px;line-height:1.65}.cleaner-chips{margin-top:9px}.cleaner-chips .chip:nth-child(2),.cleaner-chips .chip:nth-child(5){display:none}.cleaner-actions{width:100%;padding:12px;border-radius:12px;box-shadow:0 1px 2px rgba(25,28,24,.05)}.cleaner-filename-label{font-size:12px}.cleaner-filename-input{height:48px;font-size:14px}.cleaner-extension{font-size:12px}.cleaner-filename-help{font-size:10px}.cleaner-actions .btn{min-height:54px;border-radius:12px;font-size:14px}.cleaner-actions #cleanMetadataButton{display:none}.cleaner-action-note{font-size:10px}.cleaner-note{margin-top:8px;padding:0 2px;text-align:left}.overview-grid{gap:7px}.overview-item{padding:10px}.overview-item strong{font-size:13px}.stream-head{padding:11px 12px}.stream-body{padding:10px 12px}.kv-grid{grid-template-columns:1fr 1fr}.kv{padding:8px 9px}.chapter{grid-template-columns:60px 1fr}.chapter> :last-child{grid-column:2}.toast{left:10px;right:10px;bottom:calc(79px + env(safe-area-inset-bottom));max-width:none}.mobile-nav{position:fixed;z-index:75;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:6px 6px calc(6px + env(safe-area-inset-bottom));border-top:1px solid rgba(218,219,214,.82);background:rgba(255,255,255,.94);backdrop-filter:blur(18px) saturate(1.35);box-shadow:0 -8px 24px rgba(20,22,20,.06)}.app-mobile-bottom-item{position:relative;min-width:0;min-height:53px;padding:4px 2px;border:0;border-radius:11px;background:transparent;color:#777b75;display:grid;place-items:center;align-content:center;gap:2px;font-size:9px;font-weight:760}.app-mobile-bottom-item svg{width:20px;height:20px}.app-mobile-bottom-item.is-active{color:var(--accent);background:var(--accent-soft)}.app-mobile-bottom-item.is-clean-action{margin:2px 1px;min-height:49px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(45,99,57,.18)}.app-mobile-bottom-item.is-clean-action:hover{background:var(--accent-hover)}.app-mobile-bottom-item.is-clean-action:disabled{background:#eceee9;color:#9a9e97;box-shadow:none}.app-mobile-bottom-item:disabled{opacity:.3}.app-mobile-bottom-item.is-clean-action:disabled{opacity:1}.confirm-dialog{position:fixed;inset:auto 0 0 0;width:100%;max-width:none;margin:0;border-radius:18px 18px 0 0;padding-bottom:env(safe-area-inset-bottom)}footer{display:none;padding-bottom:14px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.spinner{animation-duration:1.4s}.toast,.drop-zone{transition:none}}
     /* The same file inspector opens at every viewport width. */
@@ -40,7 +40,6 @@
     body:not(:has(.file-panel.is-visible)) {display:flex;flex-direction:column;min-height:100svh}
     body:not(:has(.file-panel.is-visible)) footer {margin-top:auto}
     #intake {font-size:1rem;padding-bottom:2em}
-    .intake-tools {display:flex;align-items:center;justify-content:space-between;gap:1em}
     .drop-zone {position:relative;display:flex;align-items:center;gap:1em;padding:1em;
       border:1px dashed var(--line-strong);border-radius:4px;background:var(--surface);cursor:pointer}
     .drop-zone:hover,.drop-zone.is-dragging {border-color:var(--accent)}
@@ -52,16 +51,20 @@
     .choose-file svg {width:1.25em;height:1.25em}
     .drop-zone:hover .choose-file {background:var(--accent-hover)}
     .drop-hint {color:var(--muted);font-size:.9375em}
+    .picker-notes {display:grid;justify-items:start;gap:.125em}
+    .privacy-chip {display:inline-flex;align-items:center;gap:.35em;color:var(--muted);font-size:.8125em}
+    .privacy-chip svg {width:1.1em;height:1.1em;flex:none}
     #inspectSample {display:inline-flex;align-items:center;min-height:2.9em;padding:.35em 0;
       border:0;background:none;color:var(--accent);font-size:.9375em;text-decoration:underline;text-underline-offset:.22em}
     #inspectSample:hover {color:var(--accent-hover)}
-    .format-guide {margin:1.25em 0 0}
-    .format-guide h2 {margin:0;padding-bottom:.55em;border-bottom:1px solid var(--text);font-size:1em}
-    .format-guide p {margin:.75em 0;line-height:1.6}
+    .format-guide {margin:1.5em 0 0;border-top:1px solid var(--line-strong)}
+    .guide-row {display:grid;grid-template-columns:12em minmax(0,1fr);gap:.3em 1em;
+      padding:1em 0;border-bottom:1px solid var(--line)}
+    .guide-row h2,.guide-row p {margin:0;font-size:1em;line-height:1.6}
     .format-guide dl {margin:0}
-    .format-guide dl div {display:grid;grid-template-columns:14em minmax(0,1fr);gap:.3em 1em;padding:.85em 0;border-bottom:1px solid var(--line)}
-    .format-guide dt {color:var(--muted);font-size:.875em}
-    .format-guide dd {margin:0;font-size:.9375em;line-height:1.6;word-spacing:.14em}
+    .format-guide dl div {display:flex;flex-wrap:wrap;align-items:baseline;gap:0 .65em;margin-top:.4em;font-size:.875em}
+    .format-guide dt {color:var(--muted)}
+    .format-guide dd {margin:0}
     .source-section:has(.file-panel.is-visible) #intake {display:none}
     body:has(.file-panel.is-visible) .main {padding-top:24px}
     .file-panel.is-visible {gap:12px 24px;padding:0 0 18px;border-bottom:1px solid var(--line)}
@@ -71,6 +74,8 @@
     .file-actions {flex-wrap:wrap;gap:8px}
     .file-actions .text-btn {justify-content:center;min-height:40px;padding:6px 13px;border:1px solid var(--line-strong);border-radius:4px;color:var(--text);background:var(--surface);font-size:13px}
     .file-actions .secondary {border-color:transparent;color:var(--muted)}
+    .file-actions .text-btn {gap:7px}
+    .file-actions .text-btn svg {width:18px;height:18px;flex:none}
     .result-area {gap:18px;align-items:start}
     .report-tabs {position:sticky;z-index:12;top:var(--header-height);display:flex;gap:6px 20px;min-width:0;border-bottom:1px solid var(--line);padding:0 2px;background:var(--bg)}
     .report-page .card {scroll-margin-top:calc(var(--header-height) + 60px)}
@@ -116,15 +121,15 @@
       .overview-page {grid-template-columns:minmax(0,1fr)}
     }
     @media(max-width:600px), (min-width:700px) and (max-aspect-ratio:3/5) {
-      .drop-zone {padding:0;border:0}
+      .drop-zone {display:grid;padding:0;border:0;gap:.45em;background:transparent}
       .choose-file {width:100%}
       .drop-hint {display:none}
-      .format-guide dl div {grid-template-columns:minmax(0,1fr);padding:.75em 0}
+      .guide-row {grid-template-columns:minmax(0,1fr)}
     }
     /* Keep controls legible on tall displays with a desktop-width layout viewport. */
     @media(min-width:700px) and (max-width:1150px) and (max-aspect-ratio:3/5) {
       .app-header,.main,footer,dialog {zoom:2}
-      .privacy-chip,.report-tabs svg {display:none}
+      .report-tabs svg {display:none}
       :root {--page-gutter:16px}
       .main {padding-block:16px}
       #intake {font-size:1.2rem}
@@ -160,6 +165,12 @@
   </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <symbol id="folder-open" viewBox="0 0 24 24">
+    <path d="M3 17.5V6a1.5 1.5 0 0 1 1.5-1.5H9l2.5 3h6A1.5 1.5 0 0 1 19 9v1.5"/>
+    <path d="m3 17.5 2.7-6a1.6 1.6 0 0 1 1.5-1h13.2a1 1 0 0 1 .93 1.36L18.9 18a2 2 0 0 1-1.86 1.25H4.3A1.3 1.3 0 0 1 3 17.5Z"/>
+  </symbol>
+</svg>
 <header class="app-header">
   <div class="header-inner">
     <div class="brand">
@@ -184,27 +195,46 @@
       <div id="intake">
         <label class="drop-zone" id="dropZone">
           <span class="choose-file">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 18V5h6l2 3h10v3M3 18l3-7h16l-3 8H3z"/></svg>
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#folder-open"/></svg>
             <span id="chooseFileLabel" data-i18n="chooseFile">ファイルを開く</span>
           </span>
-          <input id="fileInput" type="file" aria-labelledby="chooseFileLabel">
-          <span class="drop-hint" aria-hidden="true" data-i18n="dropSub">または、ここにファイルをドロップ</span>
+          <input id="fileInput" type="file" aria-labelledby="chooseFileLabel" aria-describedby="localNotice">
+          <span class="picker-notes">
+            <span class="drop-hint" aria-hidden="true" data-i18n="dropSub">または、ここにファイルをドロップ</span>
+            <span class="privacy-chip" id="localNotice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span data-i18n="localOnly">完全ローカル処理</span></span>
+          </span>
         </label>
-        <div class="intake-tools">
-          <button id="inspectSample" type="button" data-i18n="sampleAction">サンプルのWAVで試す</button>
-          <div class="privacy-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg><span data-i18n="localOnly">完全ローカル処理</span></div>
+        <div class="format-guide">
+          <section class="guide-row" aria-labelledby="inspectGuide">
+            <h2 id="inspectGuide" data-i18n="inspectTitle">動画・音声の解析</h2>
+            <div>
+              <p data-i18n="inspectFields">形式、コーデック、解像度、fps、ビットレート、サンプルレート</p>
+              <button id="inspectSample" type="button" data-i18n="sampleAction">サンプルのWAVで試す</button>
+            </div>
+          </section>
+          <section class="guide-row" aria-labelledby="formatGuide">
+            <h2 id="formatGuide" data-i18n="formatsTitle">メタデータの削除</h2>
+            <div>
+              <p data-i18n="cleanCopyNote">撮影日時や位置情報などのタグを削除したコピーを保存します。</p>
+              <dl>
+                <div><dt data-i18n="formatsClean">削除に対応</dt><dd>MP4, MOV, M4V, M4A, MP3, FLAC, WAV</dd></div>
+                <div><dt data-i18n="formatsInspect">解析のみ（一例）</dt><dd>MKV, WebM, AVI, TS, Ogg</dd></div>
+              </dl>
+            </div>
+          </section>
         </div>
-        <section class="format-guide" aria-labelledby="formatGuide">
-          <h2 id="formatGuide" data-i18n="formatsTitle">メタデータの削除</h2>
-          <p data-i18n="cleanCopyNote">対応形式では、撮影日時や位置情報などのタグを削除したコピーを保存できます。</p>
-          <dl>
-            <div><dt data-i18n="formatsClean">削除して保存できる形式</dt><dd>MP4, MOV, M4V, M4A, MP3, FLAC, WAV</dd></div>
-            <div><dt data-i18n="formatsInspect">解析のみ（一例）</dt><dd>MKV, WebM, AVI, TS, Ogg</dd></div>
-          </dl>
-        </section>
       </div>
       <div class="source-body">
-        <div class="file-panel" id="filePanel"><div class="file-main"><span class="source-label" data-i18n="currentFile">選択中のファイル</span><div class="file-name" id="fileName">—</div><p class="mobile-facts" id="mobileFacts"></p><div class="file-meta"><span><span data-i18n="fileSize">サイズ</span> <strong id="fileSize">—</strong></span><span><span data-i18n="browserType">ブラウザ種別</span> <strong id="fileType">—</strong></span></div></div><div class="file-actions"><button class="text-btn secondary" id="reanalyzeButton" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18.5 11A7 7 0 0 0 6.6 7.2L4 10m16 4-2.6 2.8A7 7 0 0 1 5.5 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="reanalyze">再解析</span></button><button class="text-btn" id="replaceButton" type="button"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h8l4 4v14H7V3Z" stroke="currentColor" stroke-width="1.8"/><path d="M15 3v5h5M10 13h6" stroke="currentColor" stroke-width="1.8"/></svg><span data-i18n="anotherFile">別のファイル</span></button></div></div>
+        <div class="file-panel" id="filePanel"><div class="file-main"><span class="source-label" data-i18n="currentFile">選択中のファイル</span><div class="file-name" id="fileName">—</div><p class="mobile-facts" id="mobileFacts"></p><div class="file-meta"><span><span data-i18n="fileSize">サイズ</span> <strong id="fileSize">—</strong></span><span><span data-i18n="browserType">ブラウザ種別</span> <strong id="fileType">—</strong></span></div></div><div class="file-actions">
+          <button class="text-btn secondary" id="reanalyzeButton" type="button">
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9a8 8 0 1 0 .1 5.8"/><path d="M20 4v5h-5"/></svg>
+            <span data-i18n="reanalyze">再解析</span>
+          </button>
+          <button class="text-btn" id="replaceButton" type="button">
+            <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#folder-open"/></svg>
+            <span data-i18n="anotherFile">別のファイル</span>
+          </button>
+        </div></div>
         <p id="fileError" class="cleaner-result error" role="alert" hidden></p>
       </div>
     </section>
@@ -270,10 +300,12 @@ const I18N={
  ja:{
   qualityBitDepth:"ビット深度", hdrUnknown:"不明", moreFileFacts:"ファイルの詳細", startTime:"開始時刻", programs:"プログラム数",
   chooseFile:"ファイルを開く",
+  inspectTitle:"動画・音声の解析",
+  inspectFields:"形式、コーデック、解像度、fps、ビットレート、サンプルレート",
   formatsTitle:"メタデータの削除",
-  cleanCopyNote:"対応形式では、撮影日時や位置情報などのタグを削除したコピーを保存できます。",
+  cleanCopyNote:"撮影日時や位置情報などのタグを削除したコピーを保存します。",
   sampleAction:"サンプルのWAVで試す",
-  formatsClean:"削除して保存できる形式",
+  formatsClean:"削除に対応",
   formatsInspect:"解析のみ（一例）",
   currentFile:"選択中のファイル",
   reportNav:"解析結果",
@@ -286,10 +318,12 @@ const I18N={
  en:{
   qualityBitDepth:"Bit depth", hdrUnknown:"Unknown", moreFileFacts:"File details", startTime:"Start time", programs:"Programs",
   chooseFile:"Open file",
+  inspectTitle:"Inspect video and audio",
+  inspectFields:"Format, codec, resolution, frame rate, bitrate and sample rate",
   formatsTitle:"Remove metadata",
-  cleanCopyNote:"For supported formats, you can save a copy with tags such as recording date and location removed.",
+  cleanCopyNote:"Save a copy without tags such as recording date and location.",
   sampleAction:"Try a sample WAV",
-  formatsClean:"Formats you can clean",
+  formatsClean:"Removal supported",
   formatsInspect:"Inspect only (examples)",
   currentFile:"Selected file",
   reportNav:"Inspection results",

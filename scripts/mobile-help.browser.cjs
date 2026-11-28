@@ -52,8 +52,8 @@ async function main() {
             assert.equal(await page.locator('[data-i18n="localOnly"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
             assert.equal(await page.locator('.privacy-chip svg[aria-hidden="true"]').count(), 1, label + ': decorative shield');
             assert.match(await page.locator('.privacy-chip svg path').first().getAttribute('d'), /^M12 3 /, label + ': shield outline');
-            assert.equal(await page.locator('.privacy-chip').isVisible(), width > 760, label + ': existing badge hiding preserved');
-            if (width > 760) assert.ok(await page.locator('.privacy-chip').evaluate(el => {
+            assert.equal(await page.locator('#dropZone .privacy-chip').isVisible(), true, label + ': local processing note by file picker');
+            assert.ok(await page.locator('.privacy-chip').evaluate(el => {
               const box = el.getBoundingClientRect();
               const range = document.createRange();
               range.selectNodeContents(el.querySelector('[data-i18n="localOnly"]'));
