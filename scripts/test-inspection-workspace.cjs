@@ -3,6 +3,30 @@ const path = require('node:path');
 const {pathToFileURL} = require('node:url');
 const {chromium} = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
+async function assertPageAlignment(page) {
+  const edges = await page.evaluate(() => {
+    const box = selector => document.querySelector(selector).getBoundingClientRect();
+    const content = box('#fileSection');
+    const rows = [
+      [content.left, content.right],
+      [box('.brand').left, box('.header-actions').right]
+    ];
+    const footer = document.querySelector('footer');
+    if (footer.getClientRects().length) {
+      const rect = footer.getBoundingClientRect();
+      const style = getComputedStyle(footer);
+      const scale = rect.width / footer.offsetWidth;
+      rows.push([rect.left + parseFloat(style.paddingLeft) * scale,
+        rect.right - parseFloat(style.paddingRight) * scale]);
+    }
+    return rows;
+  });
+  for (const [left, right] of edges) {
+    assert.ok(Math.abs(left - edges[0][0]) < 1 && Math.abs(right - edges[0][1]) < 1,
+      'header, main and visible footer content must align: ' + JSON.stringify(edges));
+  }
+}
+
 async function check(browser, artifact, width, locale) {
   const portraitDesktopWidth = width === 980;
   const touch = width <= 600 || portraitDesktopWidth;
@@ -17,6 +41,11 @@ async function check(browser, artifact, width, locale) {
     await page.goto(pathToFileURL(path.resolve('dist', artifact)).href);
     const sample = page.locator('#inspectSample');
     await sample.waitFor({timeout:3000});
+    await assertPageAlignment(page);
+    assert.equal(await page.locator('#intake > :first-child').getAttribute('id'), 'dropZone');
+    const cleanupHeading = page.locator('#formatGuide');
+    assert.equal(await cleanupHeading.innerText(), locale.startsWith('ja') ? 'メタデータの削除' : 'Remove metadata');
+    assert.ok(await page.locator('[data-i18n="cleanCopyNote"]').isVisible());
     assert.equal(await page.locator('#mobileNav').isVisible(), false);
     const picker = page.locator('#fileInput');
     const pickerBox = await picker.boundingBox();
@@ -36,6 +65,7 @@ async function check(browser, artifact, width, locale) {
     await sample.focus();
     await page.keyboard.press('Enter');
     await page.locator('#resultArea').waitFor();
+    await assertPageAlignment(page);
     const report = JSON.parse(await page.locator('#rawJson').textContent());
     assert.equal(report.format.name, 'wav');
     assert.equal(report.format.duration, 3);
@@ -43,6 +73,8 @@ async function check(browser, artifact, width, locale) {
     assert.ok(report.format.metadata.date);
     const tabs = page.getByRole('tab');
     assert.equal(await tabs.count(), 4);
+    assert.equal(await tabs.nth(2).innerText(), locale.startsWith('ja') ? 'メタデータ削除' : 'Remove metadata');
+    assert.ok(await tabs.evaluateAll(items => items.every(tab => tab.scrollWidth <= tab.clientWidth + 1)));
     assert.equal(await tabs.first().getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('#overviewSection').isVisible(), true);
     assert.equal(await page.locator('#cleanerSection').isVisible(), false);

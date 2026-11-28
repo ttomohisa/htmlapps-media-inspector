@@ -16,7 +16,7 @@ Inspect common video/audio files locally and present technical media facts in a 
 3. The browser `File` is mounted through WORKERFS; the app does not call `File.arrayBuffer()` for the whole inspection input.
 4. The runner writes `/report.json` containing format, stream, HDR, metadata, subtitle, chapter and audio information.
 5. The app runs browser-side playback hints (`canPlayType()` and a local native media probe).
-6. New reports open on Overview. Four keyboard-accessible tabs switch between Overview (including Media Doctor), Tracks, Privacy and Details. Only detected stream groups appear in Tracks. Each file starts with Overview selected.
+6. New reports open on Overview. Four keyboard-accessible tabs switch between Overview (including Media Doctor), Tracks, Remove metadata and Details. Only detected stream groups appear in Tracks. Each file starts with Overview selected.
 7. For MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV, the user can create a cleaned copy without re-encoding the audio/video payload. On smartphones, the clean/save action is exposed directly in the fixed bottom action bar; the filename editor remains in the cleaner section.
 8. Before download, the cleaned copy is re-inspected with the same FFmpeg WASM inspector. If privacy-like metadata is still detected, the app warns instead of claiming complete removal.
 9. User can copy or save the structured JSON report, or save a localized technical text summary from Basic information, independently of metadata cleaning.
@@ -121,7 +121,7 @@ Media Doctor is advisory. It must not claim guaranteed compatibility. It combine
 
 ## Drop area appearance
 
-Present one column at all sizes. Desktop users can click the open-file button or drop a file within its dashed boundary. On narrow screens make the button full width. Preserve visible keyboard focus and drag feedback. Keep the opening screen and results legible in tall portrait windows that use a desktop layout width.
+Align the header, main content and visible footer to the same content width and horizontal padding before and after inspection. Start the opening screen with the file picker. Beside the format list, explain that supported files can be saved as a copy with metadata tags removed. Desktop users can click the open-file button or drop a file within its dashed boundary. On narrow screens make the button full width. Preserve visible keyboard focus and drag feedback. Keep the opening screen and results legible in tall portrait windows that use a desktop layout width.
 
 ## Mobile UX
 
