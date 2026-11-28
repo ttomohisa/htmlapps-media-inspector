@@ -6,15 +6,20 @@ Inspect common video/audio files locally and present technical media facts in a 
 
 ## Primary flow
 
-1. User chooses or drops one media file.
+- Treat video streams marked `disposition.attachedPicture` as cover art in the UI and text export. Keep their original stream indices and JSON. Exclude cover images from playback selection, video FPS, the video count and the mobile Video shortcut.
+- When the report has no audio or moving video, skip both browser checks and show a neutral “not applicable” diagnosis.
+- Show detected format, duration and bitrate above primary video and audio specifications in Overview. Keep the measured values and qualifiers available without opening Tracks. On phones, also place a compact summary below the selected filename.
+- Count plain `date` tags, including WAV creation dates, among privacy candidates. Show localized category counts before cleaning and after verified removal, without exposing their values in the result message.
+
+1. The opening screen has one file picker with the green local-processing note right-aligned immediately above it at every width. Below it, list the fields available for inspection, offer a three-second PCM WAV sample, and give the formats that support metadata removal. The picker accepts all file types so that media with an unfamiliar extension is selectable. The sample and its date tag are generated locally when requested.
 2. The app automatically starts the compact FFmpeg WASM Media Inspector runner.
 3. The browser `File` is mounted through WORKERFS; the app does not call `File.arrayBuffer()` for the whole inspection input.
 4. The runner writes `/report.json` containing format, stream, HDR, metadata, subtitle, chapter and audio information.
 5. The app runs browser-side playback hints (`canPlayType()` and a local native media probe).
-6. The result is shown as Media Doctor, metadata cleaner, overview, Video, Audio, subtitle/other and Details sections.
+6. New reports open on Overview. Four keyboard-accessible tabs switch between Overview (including Media Doctor), Tracks, Remove metadata and Details. Only detected stream groups appear in Tracks. Each file starts with Overview selected.
 7. For MP4 / MOV / M4V / M4A / MP3 / FLAC / WAV, the user can create a cleaned copy without re-encoding the audio/video payload. On smartphones, the clean/save action is exposed directly in the fixed bottom action bar; the filename editor remains in the cleaner section.
 8. Before download, the cleaned copy is re-inspected with the same FFmpeg WASM inspector. If privacy-like metadata is still detected, the app warns instead of claiming complete removal.
-9. User can copy or save the structured JSON report, or save a localized technical text summary from Basic information, independently of metadata cleaning.
+9. User can copy or save the structured JSON report, or save a localized technical text summary from Overview, independently of metadata cleaning.
 
 ## Inspection cancellation and replacement
 
@@ -30,7 +35,7 @@ Cancel also applies while the embedded runtime is expanding. Cancel, source repl
 
 ## Technical summary and container labels
 
-- Basic information provides **Save technical summary** / **技術情報の要約を保存** only after the current successful inspection report has finished publishing. Reset, reanalysis, cancellation, failure and page exit cannot export an obsolete report; cancelling replacement keeps the existing result available.
+- Overview provides **Save technical summary** / **技術情報の要約を保存** only after the current successful inspection report has finished publishing. Reset, reanalysis, cancellation, failure and page exit cannot export an obsolete report; cancelling replacement keeps the existing result available.
 - Save a synchronous, local UTF-8 `text/plain;charset=utf-8` download with localized labels and one final newline. Use a sanitized source stem plus `-inspection-summary.txt`; remove path, control and direction-control characters, trim trailing dots/spaces, bound the stem to 180 UTF-8 bytes without splitting characters, and fall back to `media`.
 - Include container, detected format, size, duration, total bitrate, stream count, and every stream's index, type and codec. Video adds resolution, frame rate and HDR classification. Audio adds sample rate, channel count/layout and an inferred-layout qualifier when reported by the inspector.
 - Qualify a known positive bitrate only for the runner's `container` or `estimated-from-size-duration` provenance. Do not infer a source for an unknown bitrate.
@@ -116,11 +121,11 @@ Media Doctor is advisory. It must not claim guaranteed compatibility. It combine
 
 ## Drop area appearance
 
-Keep the drop area plain white without a decorative color wash or hover/drag fill. Preserve the dashed boundary, accented hover/drag border and a visible keyboard-focus outline around the file input.
+Align the header, main content and visible footer to the same content width and horizontal padding before and after inspection. Start the opening screen with the file picker. Beside the format list, explain that supported files can be saved as a copy with metadata tags removed. Desktop users can click the open-file button or drop a file within its dashed boundary. On narrow screens make the button full width. Preserve visible keyboard focus and drag feedback. Keep the opening screen and results legible in tall portrait windows that use a desktop layout width.
 
 ## Mobile UX
 
-At widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
+After selecting a file, at widths up to 600px, show a safe-area-aware five-item fixed bottom navigation:
 - File
 - Doctor
 - Video
@@ -135,7 +140,7 @@ Japanese and English are included in the same HTML. Default is automatic based o
 
 ## Version
 
-App: 1.0.6
+App: 1.1.0
 FFmpeg WASM Builder dependency: 1.2.0 / `media-inspector` profile
 
 ## Header consistency (v1.0.1)

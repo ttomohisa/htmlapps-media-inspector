@@ -52,8 +52,8 @@ async function main() {
             assert.equal(await page.locator('[data-i18n="localOnly"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
             assert.equal(await page.locator('.privacy-chip svg[aria-hidden="true"]').count(), 1, label + ': decorative shield');
             assert.match(await page.locator('.privacy-chip svg path').first().getAttribute('d'), /^M12 3 /, label + ': shield outline');
-            assert.equal(await page.locator('.privacy-chip').isVisible(), width > 760, label + ': existing badge hiding preserved');
-            if (width > 760) assert.ok(await page.locator('.privacy-chip').evaluate(el => {
+            assert.equal(await page.locator('#intake > .privacy-chip').isVisible(), true, label + ': local processing note by file picker');
+            assert.ok(await page.locator('.privacy-chip').evaluate(el => {
               const box = el.getBoundingClientRect();
               const range = document.createRange();
               range.selectNodeContents(el.querySelector('[data-i18n="localOnly"]'));
@@ -61,7 +61,7 @@ async function main() {
                 && [...range.getClientRects()].every(rect => rect.left >= box.left - 1 && rect.right <= box.right + 1 && rect.top >= box.top - 1 && rect.bottom <= box.bottom + 1);
             }), label + ': badge text fits');
             assert.equal(await page.locator('footer').isVisible(), width > 600, label);
-            assert.equal(await page.locator('.mobile-nav').isVisible(), width <= 600, label + ': functional navigation preserved');
+            assert.equal(await page.locator('.mobile-nav').isVisible(), false, label + ': report actions wait for a file');
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
 

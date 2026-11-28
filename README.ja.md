@@ -1,7 +1,5 @@
 # Media Inspector
 
-ヘッダーのバージョンは v1.0.3。プライバシーバッジは「完全ローカル処理」、言語ボタンは日本語表示中に EN、英語表示中に JA と表示します。切替先と言語に合ったヘルプの説明を表示します。
-
 [![GitHub Pages](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/ttomohisa/htmlapps-media-inspector/actions/workflows/deploy-pages.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Single HTML](https://img.shields.io/badge/distribution-single%20HTML-0ea5e9)](https://ttomohisa.github.io/htmlapps-media-inspector/)
@@ -20,7 +18,7 @@ MP4 / MOV / M4V / M4A / MP3 / FLAC / WAVでは、**個人情報メタデータ�
 
 GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディアの解析はHTML内に埋め込まれたFFmpeg 9 WebAssemblyで端末内処理されます。ファイル内容、metadata、生成された解析結果をアプリが外部へ送信することはありません。
 
-![白いファイルドロップエリアを表示したMedia Inspector v1.0.5の日本語画面](assets/screenshot.png)
+![解析直後の概要で、動画の形式、解像度、fps、コーデックを確認できる日本語画面](assets/screenshot.png)
 
 ## 主な機能
 
@@ -45,7 +43,7 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 - 解析結果がある状態で別ファイルへ切り替えるときは確認ダイアログを表示
 - 日本語 / English 切り替え
 - PC・スマートフォン向けレスポンシブUI
-- スマホ下部に **ファイル / Doctor / Video / Audio / 詳細** の固定ナビ
+- スマホではファイル選択後に **ファイル / 診断 / 映像 / 音声 / 削除保存** のショートカットを表示
 - SVG faviconをHTML内に埋め込み
 - WORKERFS入力により、選択ファイル全体をWASMメモリへコピーしない
 - FFmpeg JavaScript / WebAssemblyをgzip圧縮して単一HTMLへ内包
@@ -58,7 +56,11 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 
 [デモを開く](https://ttomohisa.github.io/htmlapps-media-inspector/)だけで利用できます。インストールやアカウント登録は不要です。
 
-### 完全オフラインで使う（上級者向け）
+### オフラインで使う
+
+[最新のGitHub Release](https://github.com/ttomohisa/htmlapps-media-inspector/releases/latest) から通常版または自己展開版のHTMLをダウンロードし、ブラウザーで開きます。ZIPには両方のHTML・説明書・ビルド記録を収録しています。両HTMLとZIPのチェックサムは `SHA256SUMS.txt` で確認できます。
+
+### Windowsでソースからビルドする
 
 1. このリポジトリをダウンロードまたはクローンします。
 2. Windowsで `build-standalone.bat` を実行します。
@@ -77,17 +79,13 @@ GitHub Pagesから最初のHTMLを読み込んだ後、選択したメディア�
 
 ## 使い方
 
-1. 動画・音声ファイルを選択するか、ファイルエリアへドロップします。
-2. Media Inspectorがブラウザーの `File` をWORKERFS経由でFFmpeg Workerへマウントし、自動で解析を開始します。
-3. ブラウザーで再生できない理由を調べたい場合は、まず **Media Doctor** を確認します。
-4. **基本情報** でコンテナ、時間、bitrate、stream数などを確認します。
-5. **Video** / **Audio** カードでコーデックや映像・音声の詳細を確認します。
-6. 字幕や追加streamがある場合は **字幕・その他** を確認します。
-7. 個人情報を取り除いたコピーが必要なら **メタデータを削除して保存** を使います。元ファイルは変更されず、保存前に削除後ファイルを自動再検査します。
-8. **詳細** ではmetadata、chapters、解析JSON、FFmpeg / runner / dependency情報を確認できます。
-9. 必要なら **JSONをコピー** または **JSONを保存** します。
+[スマートフォンのファイル選択画面](assets/file-open-ja.png)
 
-**基本情報** の **技術情報の要約を保存** で、コンテナ・形式・サイズ・長さ・ビットレートと、映像・音声・字幕・データ・添付の各ストリームをUTF-8の `.txt` に保存できます。項目名は選択中の言語になります。メタデータの値、チャプター名、本文中の元ファイル名、再生可否の判定は含みません。保存ファイル名は元の名前に基づくため、共有前に氏名などが含まれていないか確認してください。
+1. 「ファイルを開く」で動画・音声を選びます。PCではボタンの横にドロップしても解析できます。「サンプルのWAVで試す」を選ぶと、端末内で生成した3秒の音声を解析します。
+2. **概要**でコンテナ、長さ、総ビットレート、主な映像・音声の仕様を確認します。「ファイルの詳細」にはストリーム数や検出形式名があります。端末の再生診断もこの画面に表示します。
+3. **トラック**で映像・音声・字幕・カバー画像の内訳を確認します。カバー画像は動画のfps集計から除外します。
+4. **メタデータ削除**で日付・位置情報などを確認し、対応形式のクリーニング済みコピーを保存します。再検査で削除を確認できた項目は種類と件数で表示します。
+5. **詳細・出力**でメタデータ、チャプター、解析JSONを確認できます。共有用の技術要約は**概要**からUTF-8テキストとして保存できます。要約本文は技術情報だけを含みます。共有前に保存ファイル名も確認してください。
 
 コンテナ名には、ファイルの拡張子よりInspectorが検出した形式を使います。区別できない形式は **MP4 / MOV** や **Matroska / WebM** と併記し、不明な場合は `—` にします。
 
@@ -99,7 +97,7 @@ JSONのコピーには、クリック時点の解析結果を使います。コ�
 
 | セクション | 主な内容 |
 | --- | --- |
-| **基本情報** | コンテナ、ファイルサイズ、時間、総bitrate、開始時刻、stream数、chapter数、probe score |
+| **概要** | コンテナ、サイズ、長さ、総ビットレート、開始時刻、ストリーム数、チャプター数。検出時のプローブスコアは「詳細・出力」のJSONで確認できます。 |
 | **Video** | Codec、FourCC、profile、level、bitrate、解像度、FPS、pixel format、SAR、走査方式、rotation、色 / HDR情報 |
 | **Audio** | Codec、profile、bitrate、sample rate、channels、channel layout、sample format、duration |
 | **字幕・その他** | Subtitle、data、attachmentなどのstream情報とmetadata |
@@ -172,6 +170,8 @@ Media Inspectorはフル版のFFmpegコマンドラインをそのままWASM化�
 Pagesがまだ有効化されていない場合、workflowはstandalone HTMLのビルドと検証を行ったうえで、デプロイだけをスキップします。SettingsでGitHub ActionsをPagesのSourceに設定した後、workflowを再実行してください。
 
 `main` へのpush時には、固定されたFFmpeg Release assetからstandalone HTMLを再生成し、repository checkを通したあと、build artifactを保存して `dist/` をPagesへ公開します。
+
+`app.config.json` の版を上げたPRをマージすると、GitHub Actionsがマージ後のコミットを検証し、そのコミットに `vX.Y.Z` タグを作成して4点の配布ファイルをGitHub Releaseで公開します。PRの段階では検証と配布ファイルの準備まで行います。[リリース手順](CONTRIBUTING.md#releasing)
 
 ## 開発とビルド
 

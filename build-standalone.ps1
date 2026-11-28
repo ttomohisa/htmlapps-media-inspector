@@ -282,10 +282,14 @@ foreach ($dependency in $dependencies) {
   }
 }
 
+$generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+if ($env:SOURCE_DATE_EPOCH) {
+  $generatedAtUtc = [DateTimeOffset]::FromUnixTimeSeconds([long]$env:SOURCE_DATE_EPOCH).UtcDateTime.ToString("o")
+}
 $manifest = [ordered]@{
   schemaVersion = 2
   builder = "htmlapps-media-inspector/1.0"
-  generatedAtUtc = [DateTime]::UtcNow.ToString("o")
+  generatedAtUtc = $generatedAtUtc
   app = [ordered]@{ name = [string]$appConfig.name; slug = [string]$appConfig.slug; version = [string]$appConfig.version }
   dependencies = $manifestDependencies
 }
@@ -330,7 +334,7 @@ if (-not $SkipSelfExtract -and ($appConfig.build.PSObject.Properties.Name -conta
       $selfExtractOutputPath = if ([System.IO.Path]::IsPathRooted($configuredSelfExtractOutput)) { $configuredSelfExtractOutput } else { Join-Path $Root $configuredSelfExtractOutput }
     }
     Write-Step "Generating self-extracting HTML"
-    & $SelfExtractBuilderPath -InputPath $OutputPath -OutputPath $selfExtractOutputPath -AppName ([string]$appConfig.name) -AppNameJa ([string]$appConfig.nameJa)
+    & $SelfExtractBuilderPath -InputPath $OutputPath -OutputPath $selfExtractOutputPath -AppName ([string]$appConfig.name) -AppNameJa ([string]$appConfig.nameJa) -GeneratedAtUtc $generatedAtUtc
   }
 }
 
